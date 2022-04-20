@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Rendering;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -14,10 +15,19 @@ using UnityEngine.XR;
 
 namespace MikanXR.SDK.Unity
 {
+    using MikanSpatialAnchorID = System.Int32;
+
+    [System.Serializable]
+    public class MikanPoseUpdateEvent : UnityEvent<MikanMatrix4f>
+    {
+    }
+
     [HelpURL("https://github.com/MikanXR/MikanXR_Unity")]
     [AddComponentMenu("MikanXR/Mikan")]
     public class MikanClient : MonoBehaviour
     {
+        private static MikanClient _instance = null;
+
         private MikanClientInfo _clientInfo;
         private MikanRenderTargetMemory _renderTargetMemory;
         private MikanStencilQuad _stencilQuad;
@@ -31,7 +41,29 @@ namespace MikanXR.SDK.Unity
         private ulong _lastReceivedVideoSourceFrame = 0;
         private ulong _lastRenderedFrame = 0;
 
+        public UnityEvent _connectEvent = new UnityEvent();
+        public UnityEvent ConnectEvent
+        {
+            get { return _connectEvent; } 
+        }
+
+        public UnityEvent _disconnectEvent = new UnityEvent();
+        public UnityEvent DisconnectEvent
+        {
+            get { return _disconnectEvent; }
+        }
+
+        private Dictionary<MikanSpatialAnchorID, MikanPoseUpdateEvent> _anchorPoseEvents = new Dictionary<MikanSpatialAnchorID, MikanPoseUpdateEvent>();
+
         public Color BackgroundColorKey = new Color(0.0f, 0.0f, 0.0f, 0.0f);
+
+        public static MikanClient Instance
+        {
+            get
+            {
+                return _instance;
+            }
+        }
 
         [Tooltip("Camera prefab for customized rendering.")]
         [SerializeField] Camera _MRCamera = null;
@@ -52,13 +84,18 @@ namespace MikanXR.SDK.Unity
             }
         }
 
+        private void Awake()
+        {
+            _instance = this;
+        }
+
         void OnEnable()
         {
             _enabled = true;
             _apiInitialized = false;
             _clientInfo = new MikanClientInfo()
             {
-                supportedFeatures = MikanClientFeatures.RenderTarget_ARGB32,
+                supportedFeatures = MikanClientFeatures.RenderTarget_RGBA32,
                 engineName = "unity",
                 engineVersion = Application.unityVersion,
                 applicationName = Application.productName,
@@ -112,8 +149,10 @@ namespace MikanXR.SDK.Unity
                         reallocateRenderBuffers();
                         //setupStencils();
                         updateCameraProjectionMatrix();
+                        _connectEvent.Invoke();
                         break;
                     case MikanEventType.disconnected:
+                        _disconnectEvent.Invoke();
                         break;
                     case MikanEventType.videoSourceOpened:
                         reallocateRenderBuffers();
@@ -134,6 +173,7 @@ namespace MikanXR.SDK.Unity
 				    case MikanEventType.vrDevicePoseUpdated:
 					   break;
 				    case MikanEventType.anchorPoseUpdated:
+                       updateAnchorPose(mikanEvent.event_payload.anchor_pose_updated);
 					   break;
 				    case MikanEventType.anchorListUpdated:
 					   break;
@@ -212,7 +252,10 @@ namespace MikanXR.SDK.Unity
 		    	return;
 
             // Apply the camera pose received
-            setCameraPose(MikanMath.MikanMatrix4fToMatrix4x4(newFrameEvent.transform));
+            setCameraPose(
+                MikanMath.MikanVector3fToVector3(newFrameEvent.cameraForward),
+                MikanMath.MikanVector3fToVector3(newFrameEvent.cameraUp),
+                MikanMath.MikanVector3fToVector3(newFrameEvent.cameraPosition));
 
             // Render out a new frame
             render(newFrameEvent.frame);
@@ -221,38 +264,14 @@ namespace MikanXR.SDK.Unity
             _lastReceivedVideoSourceFrame = newFrameEvent.frame;
         }
 
-        public static Quaternion QuaternionFromMatrix(Matrix4x4 m)
-        {
-            // Adapted from: http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
-            Quaternion q = new Quaternion();
-            q.w = Mathf.Sqrt(Mathf.Max(0, 1 + m[0, 0] + m[1, 1] + m[2, 2])) / 2;
-            q.x = Mathf.Sqrt(Mathf.Max(0, 1 + m[0, 0] - m[1, 1] - m[2, 2])) / 2;
-            q.y = Mathf.Sqrt(Mathf.Max(0, 1 - m[0, 0] + m[1, 1] - m[2, 2])) / 2;
-            q.z = Mathf.Sqrt(Mathf.Max(0, 1 - m[0, 0] - m[1, 1] + m[2, 2])) / 2;
-            q.x *= Mathf.Sign(q.x * (m[2, 1] - m[1, 2]));
-            q.y *= Mathf.Sign(q.y * (m[0, 2] - m[2, 0]));
-            q.z *= Mathf.Sign(q.z * (m[1, 0] - m[0, 1]));
-            return q;
-        }
-
-        void setCameraPose(Matrix4x4 mat)
+        void setCameraPose(Vector3 cameraForward, Vector3 cameraUp, Vector3 cameraPosition)
         {
             if (_MRCamera == null)
                 return;
 
-            if (!mat.ValidTRS())
-                return;
-
             // Decompose Matrix4x4 into a quaternion and an position
-            _MRCamera.transform.localRotation = Quaternion.LookRotation(mat.GetColumn(2), mat.GetColumn(1));
-            //_MRCamera.transform.localRotation = QuaternionFromMatrix(mat);
-            //float w = Mathf.Sqrt(1.0f + mat.m00 + mat.m11 + mat.m22) / 2.0f;
-            //_MRCamera.transform.localRotation =new Quaternion(
-            //        (mat.m21 - mat.m12) / (4.0f * w),
-            //        (mat.m02 - mat.m20) / (4.0f * w),
-            //        (mat.m10 - mat.m01) / (4.0f * w),
-            //        w);
-            _MRCamera.transform.localPosition = mat.GetColumn(3);
+            _MRCamera.transform.localRotation = Quaternion.LookRotation(cameraForward, cameraUp);
+            _MRCamera.transform.localPosition = cameraPosition;
         }
 
         void reallocateRenderBuffers()
@@ -332,6 +351,44 @@ namespace MikanXR.SDK.Unity
                 MRCamera.aspect = videoSourcePixelWidth / videoSourcePixelHeight;
                 MRCamera.nearClipPlane = (float)monoIntrinsics.znear;
                 MRCamera.farClipPlane = (float)monoIntrinsics.zfar;
+            }
+        }
+
+        void updateAnchorPose(MikanAnchorPoseUpdateEvent anchorPoseEvent)
+        {
+            MikanPoseUpdateEvent anchorEvent;
+
+            if (_anchorPoseEvents.TryGetValue(anchorPoseEvent.anchor_id, out anchorEvent))
+            {
+                anchorEvent.Invoke(anchorPoseEvent.transform);
+            }
+        }
+
+        public void addAnchorPoseListener(MikanSpatialAnchorID anchor_id, UnityAction<MikanMatrix4f> call)
+        {
+            MikanPoseUpdateEvent anchorEvent;
+
+            if (!_anchorPoseEvents.TryGetValue(anchor_id, out anchorEvent))
+            {
+                anchorEvent = new MikanPoseUpdateEvent();
+                _anchorPoseEvents.Add(anchor_id, anchorEvent);
+            }
+
+            anchorEvent.AddListener(call);
+        }
+
+        public void removeAnchorPoseListener(MikanSpatialAnchorID anchor_id, UnityAction<MikanMatrix4f> call)
+        {
+            MikanPoseUpdateEvent anchorEvent;
+
+            if (_anchorPoseEvents.TryGetValue(anchor_id, out anchorEvent))
+            {
+                anchorEvent.RemoveListener(call);
+
+                if (anchorEvent.GetPersistentEventCount() == 0)
+                {
+                    _anchorPoseEvents.Remove(anchor_id);
+                }
             }
         }
 

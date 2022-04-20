@@ -117,7 +117,7 @@ namespace MikanXR.SDK.Unity
 
         // Render target options
         RenderTarget_RGB24 = 1L << 0,
-        RenderTarget_ARGB32 = 1L << 1,
+        RenderTarget_RGBA32 = 1L << 1,
         RenderTarget_DEPTH16 = 1L << 2,
         RenderTarget_DEPTH32 = 1L << 3,
     };
@@ -489,7 +489,9 @@ namespace MikanXR.SDK.Unity
     [StructLayout(LayoutKind.Sequential)]
     public struct MikanVideoSourceNewFrameEvent
     {
-        public MikanMatrix4f transform;
+        public MikanVector3f cameraForward;
+        public MikanVector3f cameraUp;
+        public MikanVector3f cameraPosition;
         public ulong frame;
     };
 
@@ -531,7 +533,7 @@ namespace MikanXR.SDK.Unity
     public class MikanClientAPI
     {
 
-#if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN) && UNITY_64
+//#if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN) && UNITY_64
         [DllImport("Mikan_CAPI", CharSet = CharSet.Ansi)]
         public static extern MikanResult Mikan_Initialize(
             MikanLogLevel log_level,
@@ -619,8 +621,8 @@ namespace MikanXR.SDK.Unity
 
         [DllImport("Mikan_CAPI")]
         public static extern MikanResult Mikan_Shutdown();
-#else
-    //TODO
-#endif
+//#else
+//    //TODO
+//#endif
     }
 }
