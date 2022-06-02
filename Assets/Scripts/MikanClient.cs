@@ -8,6 +8,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using System;
 using System.Runtime.InteropServices;
 using System.IO;
+using UnityEngine.Experimental.Rendering;
 
 #if UNITY_2017_2_OR_NEWER
 using UnityEngine.XR;
@@ -33,6 +34,7 @@ namespace MikanXR.SDK.Unity
         private MikanStencilQuad _stencilQuad;
         private Matrix4x4 _originSpatialAnchorXform = Matrix4x4.identity;
         private RenderTexture _renderTexture;
+        //private Texture2D _externalTexture;
         private AsyncGPUReadbackRequest _readbackRequest = new AsyncGPUReadbackRequest();
 
         private bool _enabled = false;
@@ -93,6 +95,20 @@ namespace MikanXR.SDK.Unity
         {
             _enabled = true;
             _apiInitialized = false;
+
+            MikanClientGraphicsAPI graphicsAPI = MikanClientGraphicsAPI.UNKNOWN;
+            switch(SystemInfo.graphicsDeviceType)
+            {
+                case GraphicsDeviceType.Direct3D11:
+                    graphicsAPI = MikanClientGraphicsAPI.Direct3D11;
+                    break;
+                case GraphicsDeviceType.OpenGLCore:
+                case GraphicsDeviceType.OpenGLES2:
+                case GraphicsDeviceType.OpenGLES3:
+                    graphicsAPI = MikanClientGraphicsAPI.OpenGL;
+                    break;
+            }
+
             _clientInfo = new MikanClientInfo()
             {
                 supportedFeatures = MikanClientFeatures.RenderTarget_RGBA32,
@@ -103,7 +119,7 @@ namespace MikanXR.SDK.Unity
 #if UNITY_2017_2_OR_NEWER
                 xrDeviceName = XRSettings.loadedDeviceName,
 #endif
-                graphicsAPI = SystemInfo.graphicsDeviceType.ToString(),
+                graphicsAPI = graphicsAPI,
                 mikanSdkVersion = SDKConstants.SDK_VERSION,
             };
 
@@ -126,10 +142,6 @@ namespace MikanXR.SDK.Unity
                 }
 
                 freeFrameBuffer();
-                MikanClientAPI.Mikan_FreeRenderTargetBuffers();
-
-                MikanClientAPI.Mikan_Disconnect();
-
                 MikanClientAPI.Mikan_Shutdown();
                 _apiInitialized = false;
             }
@@ -292,15 +304,16 @@ namespace MikanXR.SDK.Unity
                     g= BackgroundColorKey.g, 
                     b= BackgroundColorKey.b
                 };
-                desc.color_buffer_type = MikanColorBufferType.ARGB32;
+                desc.color_buffer_type = MikanColorBufferType.RGBA32;
                 desc.depth_buffer_type = MikanDepthBufferType.NONE;
+                desc.graphicsAPI = _clientInfo.graphicsAPI;
 
                 MikanClientAPI.Mikan_AllocateRenderTargetBuffers(desc, out _renderTargetMemory);
-                createFrameBuffer(mode.resolution_x, mode.resolution_y);
+                createFrameBuffer(_renderTargetMemory, mode.resolution_x, mode.resolution_y);
             }
         }
 
-        bool createFrameBuffer(int width, int height)
+        bool createFrameBuffer(MikanRenderTargetMemory renderTargetMemory, int width, int height)
         {
             bool bSuccess = true;
 
@@ -309,6 +322,8 @@ namespace MikanXR.SDK.Unity
                 Debug.LogError("Mikan: Unable to create render texture. Texture dimension must be higher than zero.");
                 return false;
             }
+
+            //_externalTexture = Texture2D.CreateExternalTexture(width, height, TextureFormat.RGBA32, false, true, renderTargetMemory.color_texture_pointer);
 
             int depthBufferPrecision = 0;
             _renderTexture = new RenderTexture(width, height, depthBufferPrecision, RenderTextureFormat.ARGB32)
@@ -325,17 +340,18 @@ namespace MikanXR.SDK.Unity
                 return false;
             }
 
+
             return bSuccess;
         }
 
         void freeFrameBuffer()
         {
-            if (_renderTexture == null) return;
-            if (_renderTexture.IsCreated())
+            if (_renderTexture != null && _renderTexture.IsCreated())
             {
                 _renderTexture.Release();
             }
             _renderTexture = null;
+            //_externalTexture = null;
         }
 
         void updateCameraProjectionMatrix()
@@ -399,9 +415,21 @@ namespace MikanXR.SDK.Unity
             _MRCamera.Render();
             _MRCamera.targetTexture = null;
 
-            if (_renderTargetMemory.color_buffer != IntPtr.Zero)
+            if (_clientInfo.graphicsAPI == MikanClientGraphicsAPI.Direct3D11 ||
+                _clientInfo.graphicsAPI == MikanClientGraphicsAPI.OpenGL)
             {
-                _readbackRequest= AsyncGPUReadback.Request(_renderTexture, 0, ReadbackCompleted);
+                IntPtr textureNativePtr = _renderTexture.GetNativeTexturePtr();
+
+                // Fast interprocess shared texture transfer
+                MikanClientAPI.Mikan_PublishRenderTargetTexture(textureNativePtr, frame_index);
+            }
+            if (_clientInfo.graphicsAPI == MikanClientGraphicsAPI.UNKNOWN)
+            {
+                if (_renderTargetMemory.color_buffer != IntPtr.Zero)
+                {
+                    // Slow texture read-back / shared CPU memory transfer
+                    _readbackRequest = AsyncGPUReadback.Request(_renderTexture, 0, ReadbackCompleted);
+                }
             }
         }
 
