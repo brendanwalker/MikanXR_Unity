@@ -1,3 +1,0 @@
-[2022-05-05 21:38:10.30]: InterprocessMessageClient::connect() - Successfully connected
-[2022-05-05 21:38:10.87]: SharedMemory::initialize() - Allocating shared memory: b6744a2ddb67e07b43fa2f36b1d094c3_renderTarget
-[2022-05-05 21:39:16.833]: InterprocessMessageClient::connect() - Successfully connected
