@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace MikanXR.SDK.Unity
+namespace Mikan
 {
 
     public static class MikanMath 

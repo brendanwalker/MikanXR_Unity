@@ -2,32 +2,32 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace MikanXR.SDK.Unity
+namespace Mikan
 {
     /// The ID of a VR Device
     using MikanSpatialAnchorID = System.Int32;
 
     public class MikanAnchor : MonoBehaviour
     {
-        private MikanSpatialAnchorID _anchorId = SDKConstants.INVALID_MIKAN_ID;
+        private MikanSpatialAnchorID _anchorId = MikanClient.INVALID_MIKAN_ID;
 
         public string AnchorName;
 
         // Start is called before the first frame update
         void Start()
         {
-            if (MikanClient.Instance != null)
+            if (MikanComponent.Instance != null)
             {
-                MikanClient.Instance.ConnectEvent.AddListener(OnMikanConnected);
-                MikanClient.Instance.addAnchorPoseListener(_anchorId, AnchorPoseChanged);
+                MikanComponent.Instance.ConnectEvent.AddListener(OnMikanConnected);
+                MikanComponent.Instance.addAnchorPoseListener(_anchorId, AnchorPoseChanged);
             }
         }
 
         private void OnDestroy()
         {
-            if (MikanClient.Instance != null)
+            if (MikanComponent.Instance != null)
             {
-                MikanClient.Instance.removeAnchorPoseListener(_anchorId, AnchorPoseChanged);
+                MikanComponent.Instance.removeAnchorPoseListener(_anchorId, AnchorPoseChanged);
             }
         }
 
@@ -38,10 +38,10 @@ namespace MikanXR.SDK.Unity
 
         void FindAnchorInfo()
         {
-            if (MikanClientAPI.Mikan_GetIsConnected())
+            if (MikanClient.Mikan_GetIsConnected())
             {
-                MikanSpatialAnchorInfo anchorInfo;
-                if (MikanClientAPI.Mikan_FindSpatialAnchorInfoByName(AnchorName, out anchorInfo) == MikanResult.Success)
+                MikanSpatialAnchorInfo anchorInfo = new MikanSpatialAnchorInfo();
+                if (MikanClient.Mikan_FindSpatialAnchorInfoByName(AnchorName, anchorInfo) == MikanResult.Success)
                 {
                     _anchorId = anchorInfo.anchor_id;
                     AnchorPoseChanged(anchorInfo.anchor_xform);

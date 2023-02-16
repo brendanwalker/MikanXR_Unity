@@ -14,7 +14,7 @@ using UnityEngine.Experimental.Rendering;
 using UnityEngine.XR;
 #endif
 
-namespace MikanXR.SDK.Unity
+namespace Mikan
 {
     using MikanSpatialAnchorID = System.Int32;
 
@@ -25,9 +25,9 @@ namespace MikanXR.SDK.Unity
 
     [HelpURL("https://github.com/MikanXR/MikanXR_Unity")]
     [AddComponentMenu("MikanXR/Mikan")]
-    public class MikanClient : MonoBehaviour
+    public class MikanComponent : MonoBehaviour
     {
-        private static MikanClient _instance = null;
+        private static MikanComponent _instance = null;
 
         private MikanClientInfo _clientInfo;
         private MikanRenderTargetMemory _renderTargetMemory;
@@ -59,7 +59,7 @@ namespace MikanXR.SDK.Unity
 
         public Color BackgroundColorKey = new Color(0.0f, 0.0f, 0.0f, 0.0f);
 
-        public static MikanClient Instance
+        public static MikanComponent Instance
         {
             get
             {
@@ -93,67 +93,96 @@ namespace MikanXR.SDK.Unity
 
         void OnEnable()
         {
-            _enabled = true;
-            _apiInitialized = false;
-
-            MikanClientGraphicsAPI graphicsAPI = MikanClientGraphicsAPI.UNKNOWN;
-            switch(SystemInfo.graphicsDeviceType)
+            if (!_enabled)
             {
-                case GraphicsDeviceType.Direct3D11:
-                    graphicsAPI = MikanClientGraphicsAPI.Direct3D11;
-                    break;
-                case GraphicsDeviceType.OpenGLCore:
-                case GraphicsDeviceType.OpenGLES2:
-                case GraphicsDeviceType.OpenGLES3:
-                    graphicsAPI = MikanClientGraphicsAPI.OpenGL;
-                    break;
+                _enabled = true;
+                _apiInitialized = false;
+
+                MikanClientGraphicsApi graphicsAPI = MikanClientGraphicsApi.UNKNOWN;
+                switch(SystemInfo.graphicsDeviceType)
+                {
+                    case GraphicsDeviceType.Direct3D11:
+                        graphicsAPI = MikanClientGraphicsApi.Direct3D11;
+                        break;
+                    case GraphicsDeviceType.OpenGLCore:
+                    case GraphicsDeviceType.OpenGLES2:
+                    case GraphicsDeviceType.OpenGLES3:
+                        graphicsAPI = MikanClientGraphicsApi.OpenGL;
+                        break;
+                }
+
+                _clientInfo = new MikanClientInfo()
+                {
+                    supportedFeatures = (ulong)MikanClientFeatures.RenderTarget_RGBA32,
+                    engineName = "unity",
+                    engineVersion = Application.unityVersion,
+                    applicationName = Application.productName,
+                    applicationVersion = Application.version,
+    #if UNITY_2017_2_OR_NEWER
+                    xrDeviceName = XRSettings.loadedDeviceName,
+    #endif
+                    graphicsAPI = graphicsAPI,
+                    mikanSdkVersion = MikanClient.MIKAN_CLIENT_VERSION_STRING,
+                };
+
+                MikanResult result= MikanClient.Mikan_Initialize(MikanLogLevel.Info, OnMikanLog);
+                if (result == MikanResult.Success)
+                {
+                    _apiInitialized = true;
+                }
             }
+        }
 
-            _clientInfo = new MikanClientInfo()
+        void OnMikanLog(int log_level, string log_message)
+        {
+            MikanLogLevel mikanLogLevel = (MikanLogLevel)log_level;
+            switch(mikanLogLevel)
             {
-                supportedFeatures = MikanClientFeatures.RenderTarget_RGBA32,
-                engineName = "unity",
-                engineVersion = Application.unityVersion,
-                applicationName = Application.productName,
-                applicationVersion = Application.version,
-#if UNITY_2017_2_OR_NEWER
-                xrDeviceName = XRSettings.loadedDeviceName,
-#endif
-                graphicsAPI = graphicsAPI,
-                mikanSdkVersion = SDKConstants.SDK_VERSION,
-            };
-
-            MikanResult result= MikanClientAPI.Mikan_Initialize(MikanLogLevel.Info, "UnityClient.log");
-            if (result == MikanResult.Success)
-            {
-                _apiInitialized = true;
+                case MikanLogLevel.Trace:
+                case MikanLogLevel.Debug:
+                case MikanLogLevel.Info:
+                    Debug.Log(log_message);
+                    break;
+                case MikanLogLevel.Warning:
+                    Debug.LogWarning(log_message);
+                    break;
+                case MikanLogLevel.Error:
+                    Debug.LogError(log_message);
+                    break;                            
+                case MikanLogLevel.Fatal:
+                    Debug.LogAssertion(log_message);
+                    break;
             }
         }
 
         void OnDisable()
         {
-            _enabled = false;
-
-            if (_apiInitialized)
+            if (_enabled)
             {
-                if (!_readbackRequest.done)
+
+                if (_apiInitialized)
                 {
-                    _readbackRequest.WaitForCompletion();
+                    if (!_readbackRequest.done)
+                    {
+                        _readbackRequest.WaitForCompletion();
+                    }
+
+                    freeFrameBuffer();
+                    MikanClient.Mikan_Shutdown();
+                    _apiInitialized = false;
                 }
 
-                freeFrameBuffer();
-                MikanClientAPI.Mikan_Shutdown();
-                _apiInitialized = false;
+                _enabled = false;
             }
         }
 
         // Update is called once per frame
         void Update()
         {
-            if (MikanClientAPI.Mikan_GetIsConnected())
+            if (MikanClient.Mikan_GetIsConnected())
             {
-                MikanEvent mikanEvent;
-                while (MikanClientAPI.Mikan_PollNextEvent(out mikanEvent) == MikanResult.Success)
+                MikanEvent mikanEvent = new MikanEvent();
+                while (MikanClient.Mikan_PollNextEvent(mikanEvent) == MikanResult.Success)
                 {
                     switch(mikanEvent.event_type)
                     {
@@ -196,7 +225,7 @@ namespace MikanXR.SDK.Unity
             {
                 if (_mikanReconnectTimeout <= 0.0f)
                 {
-                    if (MikanClientAPI.Mikan_Connect(_clientInfo) == MikanResult.Success)
+                    if (MikanClient.Mikan_Connect(_clientInfo) == MikanResult.Success)
                     {
                         _lastReceivedVideoSourceFrame = 0;
                     }
@@ -213,48 +242,23 @@ namespace MikanXR.SDK.Unity
             }
         }
 
-        void setupStencils()
+        void setupOriginSpatialAnchor()
         {
             // Skip if stencils are already created
-            MikanStencilList stencilList;
-            MikanClientAPI.Mikan_GetStencilList(out stencilList);
+            MikanStencilList stencilList = new MikanStencilList();
+            MikanClient.Mikan_GetStencilList(stencilList);
             if (stencilList.stencil_count > 0)
                 return;
 
             // Get the origin spatial anchor to build the stencil scene around
-            MikanSpatialAnchorInfo originSpatialAnchor;
-            if (MikanClientAPI.Mikan_FindSpatialAnchorInfoByName("origin", out originSpatialAnchor) == MikanResult.Success)
+            MikanSpatialAnchorInfo originSpatialAnchor = new MikanSpatialAnchorInfo();
+            if (MikanClient.Mikan_FindSpatialAnchorInfoByName("origin", originSpatialAnchor) == MikanResult.Success)
             {
                 _originSpatialAnchorXform = MikanMath.MikanMatrix4fToMatrix4x4(originSpatialAnchor.anchor_xform);
             }
             else
             {
                 _originSpatialAnchorXform = Matrix4x4.identity;
-            }
-
-            // Create a stencil in front of the origin
-            {
-                Vector4 col0 = _originSpatialAnchorXform.GetColumn(0);
-                Vector4 col1 = _originSpatialAnchorXform.GetColumn(1);
-                Vector4 col2 = _originSpatialAnchorXform.GetColumn(2);
-                Vector4 col3 = _originSpatialAnchorXform.GetColumn(3);
-
-                Vector3 quad_x_axis = new Vector3(col0.x, col0.y, col0.z);
-                Vector3 quad_y_axis = new Vector3(col1.x, col1.y, col1.z);
-                Vector3 quad_normal = new Vector3(col2.x, col2.y, col2.z);
-                Vector3 quad_center = new Vector3(col3.x, col3.y, col3.z) + quad_normal * 0.4f + quad_y_axis * 0.3f;
-
-                _stencilQuad = new MikanStencilQuad();
-                _stencilQuad.stencil_id = SDKConstants.INVALID_MIKAN_ID; // filled in on allocation
-                _stencilQuad.quad_center = MikanMath.Vector3ToMikanVector3f(quad_center);
-                _stencilQuad.quad_x_axis = MikanMath.Vector3ToMikanVector3f(quad_x_axis);
-                _stencilQuad.quad_y_axis = MikanMath.Vector3ToMikanVector3f(quad_y_axis);
-                _stencilQuad.quad_normal = MikanMath.Vector3ToMikanVector3f(quad_normal);
-                _stencilQuad.quad_width = 0.25f;
-                _stencilQuad.quad_height = 0.25f;
-                _stencilQuad.is_double_sided = true;
-                _stencilQuad.is_disabled = false;
-                MikanClientAPI.Mikan_AllocateQuadStencil(ref _stencilQuad);
             }
         }
 
@@ -290,13 +294,13 @@ namespace MikanXR.SDK.Unity
         {
             freeFrameBuffer();
 
-            MikanClientAPI.Mikan_FreeRenderTargetBuffers();
+            MikanClient.Mikan_FreeRenderTargetBuffers();
             _renderTargetMemory = new MikanRenderTargetMemory();
 
-            MikanVideoSourceMode mode;
-            if (MikanClientAPI.Mikan_GetVideoSourceMode(out mode) == MikanResult.Success)
+            MikanVideoSourceMode mode = new MikanVideoSourceMode();
+            if (MikanClient.Mikan_GetVideoSourceMode(mode) == MikanResult.Success)
             {
-                MikanRenderTargetDescriptor desc;
+                MikanRenderTargetDescriptor desc = new MikanRenderTargetDescriptor();
                 desc.width = (uint)mode.resolution_x;
                 desc.height = (uint)mode.resolution_y;
                 desc.color_key = new MikanColorRGB() { 
@@ -305,10 +309,10 @@ namespace MikanXR.SDK.Unity
                     b= BackgroundColorKey.b
                 };
                 desc.color_buffer_type = MikanColorBufferType.RGBA32;
-                desc.depth_buffer_type = MikanDepthBufferType.NONE;
+                desc.depth_buffer_type = MikanDepthBufferType.NODEPTH;
                 desc.graphicsAPI = _clientInfo.graphicsAPI;
 
-                MikanClientAPI.Mikan_AllocateRenderTargetBuffers(desc, out _renderTargetMemory);
+                MikanClient.Mikan_AllocateRenderTargetBuffers(desc, _renderTargetMemory);
                 createFrameBuffer(_renderTargetMemory, mode.resolution_x, mode.resolution_y);
             }
         }
@@ -356,8 +360,8 @@ namespace MikanXR.SDK.Unity
 
         void updateCameraProjectionMatrix()
         {
-            MikanVideoSourceIntrinsics videoSourceIntrinsics;
-            if (MikanClientAPI.Mikan_GetVideoSourceIntrinsics(out videoSourceIntrinsics) == MikanResult.Success)
+            MikanVideoSourceIntrinsics videoSourceIntrinsics = new MikanVideoSourceIntrinsics();
+            if (MikanClient.Mikan_GetVideoSourceIntrinsics(videoSourceIntrinsics) == MikanResult.Success)
             {
                 MikanMonoIntrinsics monoIntrinsics = videoSourceIntrinsics.intrinsics.mono;
                 float videoSourcePixelWidth = (float)monoIntrinsics.pixel_width;
@@ -415,15 +419,15 @@ namespace MikanXR.SDK.Unity
             _MRCamera.Render();
             _MRCamera.targetTexture = null;
 
-            if (_clientInfo.graphicsAPI == MikanClientGraphicsAPI.Direct3D11 ||
-                _clientInfo.graphicsAPI == MikanClientGraphicsAPI.OpenGL)
+            if (_clientInfo.graphicsAPI == MikanClientGraphicsApi.Direct3D11 ||
+                _clientInfo.graphicsAPI == MikanClientGraphicsApi.OpenGL)
             {
                 IntPtr textureNativePtr = _renderTexture.GetNativeTexturePtr();
 
                 // Fast interprocess shared texture transfer
-                MikanClientAPI.Mikan_PublishRenderTargetTexture(textureNativePtr, frame_index);
+                MikanClient.Mikan_PublishRenderTargetTexture(textureNativePtr, frame_index);
             }
-            if (_clientInfo.graphicsAPI == MikanClientGraphicsAPI.UNKNOWN)
+            if (_clientInfo.graphicsAPI == MikanClientGraphicsApi.UNKNOWN)
             {
                 if (_renderTargetMemory.color_buffer != IntPtr.Zero)
                 {
@@ -441,7 +445,7 @@ namespace MikanXR.SDK.Unity
 
                 if (buffer.Length > 0 &&
                     _renderTargetMemory.color_buffer != IntPtr.Zero &&
-                    _renderTargetMemory.color_buffer_size.ToUInt32() == buffer.Length)
+                    _renderTargetMemory.color_buffer_size == buffer.Length)
                 {
                     unsafe
                     {
@@ -453,7 +457,7 @@ namespace MikanXR.SDK.Unity
                     }
 
                     // Publish the new video frame back to Mikan
-                    MikanClientAPI.Mikan_PublishRenderTargetBuffers(_lastRenderedFrame);
+                    MikanClient.Mikan_PublishRenderTargetBuffers(_lastRenderedFrame);
                 }
             }
         }
