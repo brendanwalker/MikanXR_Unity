@@ -108,6 +108,11 @@ public class MikanClient {
     return ret;
   }
 
+  public static MikanResult Mikan_SendScriptMessage(MikanScriptMessageInfo message) {
+    MikanResult ret = (MikanResult)MikanClientPINVOKE.Mikan_SendScriptMessage(MikanScriptMessageInfo.getCPtr(message));
+    return ret;
+  }
+
   public static MikanResult Mikan_GetStencilList(MikanStencilList out_stencil_list) {
     MikanResult ret = (MikanResult)MikanClientPINVOKE.Mikan_GetStencilList(MikanStencilList.getCPtr(out_stencil_list));
     return ret;
@@ -162,6 +167,8 @@ public class MikanClient {
   public static readonly int MAX_MIKAN_STENCIL_NAME_LEN = MikanClientPINVOKE.MAX_MIKAN_STENCIL_NAME_LEN_get();
   public static readonly int MAX_MIKAN_SPATIAL_ANCHORS = MikanClientPINVOKE.MAX_MIKAN_SPATIAL_ANCHORS_get();
   public static readonly int MAX_MIKAN_ANCHOR_NAME_LEN = MikanClientPINVOKE.MAX_MIKAN_ANCHOR_NAME_LEN_get();
+  public static readonly int MAX_MIKAN_SCRIPT_MESSAGE_LEN = MikanClientPINVOKE.MAX_MIKAN_SCRIPT_MESSAGE_LEN_get();
+  public static readonly string ORIGIN_SPATIAL_ANCHOR_NAME = MikanClientPINVOKE.ORIGIN_SPATIAL_ANCHOR_NAME_get();
 }
 
 }

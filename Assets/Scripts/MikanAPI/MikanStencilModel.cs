@@ -77,35 +77,13 @@ public class MikanStencilModel : global::System.IDisposable {
     } 
   }
 
-  public MikanVector3f model_position {
+  public MikanTransform relative_transform {
     set {
-      MikanClientPINVOKE.MikanStencilModel_model_position_set(swigCPtr, MikanVector3f.getCPtr(value));
+      MikanClientPINVOKE.MikanStencilModel_relative_transform_set(swigCPtr, MikanTransform.getCPtr(value));
     } 
     get {
-      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanStencilModel_model_position_get(swigCPtr);
-      MikanVector3f ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanVector3f(cPtr, false);
-      return ret;
-    } 
-  }
-
-  public MikanRotator3f model_rotator {
-    set {
-      MikanClientPINVOKE.MikanStencilModel_model_rotator_set(swigCPtr, MikanRotator3f.getCPtr(value));
-    } 
-    get {
-      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanStencilModel_model_rotator_get(swigCPtr);
-      MikanRotator3f ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanRotator3f(cPtr, false);
-      return ret;
-    } 
-  }
-
-  public MikanVector3f model_scale {
-    set {
-      MikanClientPINVOKE.MikanStencilModel_model_scale_set(swigCPtr, MikanVector3f.getCPtr(value));
-    } 
-    get {
-      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanStencilModel_model_scale_get(swigCPtr);
-      MikanVector3f ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanVector3f(cPtr, false);
+      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanStencilModel_relative_transform_get(swigCPtr);
+      MikanTransform ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanTransform(cPtr, false);
       return ret;
     } 
   }

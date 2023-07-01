@@ -616,6 +616,36 @@ class MikanClientPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_delete_MikanMatrix4d")]
   public static extern void delete_MikanMatrix4d(global::System.Runtime.InteropServices.HandleRef jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanQuatf_w_set")]
+  public static extern void MikanQuatf_w_set(global::System.Runtime.InteropServices.HandleRef jarg1, float jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanQuatf_w_get")]
+  public static extern float MikanQuatf_w_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanQuatf_x_set")]
+  public static extern void MikanQuatf_x_set(global::System.Runtime.InteropServices.HandleRef jarg1, float jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanQuatf_x_get")]
+  public static extern float MikanQuatf_x_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanQuatf_y_set")]
+  public static extern void MikanQuatf_y_set(global::System.Runtime.InteropServices.HandleRef jarg1, float jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanQuatf_y_get")]
+  public static extern float MikanQuatf_y_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanQuatf_z_set")]
+  public static extern void MikanQuatf_z_set(global::System.Runtime.InteropServices.HandleRef jarg1, float jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanQuatf_z_get")]
+  public static extern float MikanQuatf_z_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_new_MikanQuatf")]
+  public static extern global::System.IntPtr new_MikanQuatf();
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_delete_MikanQuatf")]
+  public static extern void delete_MikanQuatf(global::System.Runtime.InteropServices.HandleRef jarg1);
+
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanQuatd_w_set")]
   public static extern void MikanQuatd_w_set(global::System.Runtime.InteropServices.HandleRef jarg1, double jarg2);
 
@@ -646,6 +676,30 @@ class MikanClientPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_delete_MikanQuatd")]
   public static extern void delete_MikanQuatd(global::System.Runtime.InteropServices.HandleRef jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanTransform_scale_set")]
+  public static extern void MikanTransform_scale_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanTransform_scale_get")]
+  public static extern global::System.IntPtr MikanTransform_scale_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanTransform_rotation_set")]
+  public static extern void MikanTransform_rotation_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanTransform_rotation_get")]
+  public static extern global::System.IntPtr MikanTransform_rotation_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanTransform_position_set")]
+  public static extern void MikanTransform_position_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanTransform_position_get")]
+  public static extern global::System.IntPtr MikanTransform_position_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_new_MikanTransform")]
+  public static extern global::System.IntPtr new_MikanTransform();
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_delete_MikanTransform")]
+  public static extern void delete_MikanTransform(global::System.Runtime.InteropServices.HandleRef jarg1);
+
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_INVALID_MIKAN_ID_get")]
   public static extern int INVALID_MIKAN_ID_get();
 
@@ -663,6 +717,12 @@ class MikanClientPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MAX_MIKAN_ANCHOR_NAME_LEN_get")]
   public static extern int MAX_MIKAN_ANCHOR_NAME_LEN_get();
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MAX_MIKAN_SCRIPT_MESSAGE_LEN_get")]
+  public static extern int MAX_MIKAN_SCRIPT_MESSAGE_LEN_get();
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_ORIGIN_SPATIAL_ANCHOR_NAME_get")]
+  public static extern string ORIGIN_SPATIAL_ANCHOR_NAME_get();
 
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanClientInfo_supportedFeatures_set")]
   public static extern void MikanClientInfo_supportedFeatures_set(global::System.Runtime.InteropServices.HandleRef jarg1, ulong jarg2);
@@ -838,29 +898,11 @@ class MikanClientPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilQuad_parent_anchor_id_get")]
   public static extern int MikanStencilQuad_parent_anchor_id_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilQuad_quad_center_set")]
-  public static extern void MikanStencilQuad_quad_center_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilQuad_relative_transform_set")]
+  public static extern void MikanStencilQuad_relative_transform_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilQuad_quad_center_get")]
-  public static extern global::System.IntPtr MikanStencilQuad_quad_center_get(global::System.Runtime.InteropServices.HandleRef jarg1);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilQuad_quad_x_axis_set")]
-  public static extern void MikanStencilQuad_quad_x_axis_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilQuad_quad_x_axis_get")]
-  public static extern global::System.IntPtr MikanStencilQuad_quad_x_axis_get(global::System.Runtime.InteropServices.HandleRef jarg1);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilQuad_quad_y_axis_set")]
-  public static extern void MikanStencilQuad_quad_y_axis_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilQuad_quad_y_axis_get")]
-  public static extern global::System.IntPtr MikanStencilQuad_quad_y_axis_get(global::System.Runtime.InteropServices.HandleRef jarg1);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilQuad_quad_normal_set")]
-  public static extern void MikanStencilQuad_quad_normal_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilQuad_quad_normal_get")]
-  public static extern global::System.IntPtr MikanStencilQuad_quad_normal_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilQuad_relative_transform_get")]
+  public static extern global::System.IntPtr MikanStencilQuad_relative_transform_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilQuad_quad_width_set")]
   public static extern void MikanStencilQuad_quad_width_set(global::System.Runtime.InteropServices.HandleRef jarg1, float jarg2);
@@ -910,29 +952,11 @@ class MikanClientPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilBox_parent_anchor_id_get")]
   public static extern int MikanStencilBox_parent_anchor_id_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilBox_box_center_set")]
-  public static extern void MikanStencilBox_box_center_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilBox_relative_transform_set")]
+  public static extern void MikanStencilBox_relative_transform_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilBox_box_center_get")]
-  public static extern global::System.IntPtr MikanStencilBox_box_center_get(global::System.Runtime.InteropServices.HandleRef jarg1);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilBox_box_x_axis_set")]
-  public static extern void MikanStencilBox_box_x_axis_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilBox_box_x_axis_get")]
-  public static extern global::System.IntPtr MikanStencilBox_box_x_axis_get(global::System.Runtime.InteropServices.HandleRef jarg1);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilBox_box_y_axis_set")]
-  public static extern void MikanStencilBox_box_y_axis_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilBox_box_y_axis_get")]
-  public static extern global::System.IntPtr MikanStencilBox_box_y_axis_get(global::System.Runtime.InteropServices.HandleRef jarg1);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilBox_box_z_axis_set")]
-  public static extern void MikanStencilBox_box_z_axis_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilBox_box_z_axis_get")]
-  public static extern global::System.IntPtr MikanStencilBox_box_z_axis_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilBox_relative_transform_get")]
+  public static extern global::System.IntPtr MikanStencilBox_relative_transform_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilBox_box_x_size_set")]
   public static extern void MikanStencilBox_box_x_size_set(global::System.Runtime.InteropServices.HandleRef jarg1, float jarg2);
@@ -982,23 +1006,11 @@ class MikanClientPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilModel_parent_anchor_id_get")]
   public static extern int MikanStencilModel_parent_anchor_id_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilModel_model_position_set")]
-  public static extern void MikanStencilModel_model_position_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilModel_relative_transform_set")]
+  public static extern void MikanStencilModel_relative_transform_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilModel_model_position_get")]
-  public static extern global::System.IntPtr MikanStencilModel_model_position_get(global::System.Runtime.InteropServices.HandleRef jarg1);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilModel_model_rotator_set")]
-  public static extern void MikanStencilModel_model_rotator_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilModel_model_rotator_get")]
-  public static extern global::System.IntPtr MikanStencilModel_model_rotator_get(global::System.Runtime.InteropServices.HandleRef jarg1);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilModel_model_scale_set")]
-  public static extern void MikanStencilModel_model_scale_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilModel_model_scale_get")]
-  public static extern global::System.IntPtr MikanStencilModel_model_scale_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilModel_relative_transform_get")]
+  public static extern global::System.IntPtr MikanStencilModel_relative_transform_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanStencilModel_is_disabled_set")]
   public static extern void MikanStencilModel_is_disabled_set(global::System.Runtime.InteropServices.HandleRef jarg1, bool jarg2);
@@ -1291,12 +1303,6 @@ class MikanClientPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_delete_MikanVideoSourceIntrinsics_intrinsics")]
   public static extern void delete_MikanVideoSourceIntrinsics_intrinsics(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanVideoSourceAttachmentInfo_parent_anchor_id_set")]
-  public static extern void MikanVideoSourceAttachmentInfo_parent_anchor_id_set(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanVideoSourceAttachmentInfo_parent_anchor_id_get")]
-  public static extern int MikanVideoSourceAttachmentInfo_parent_anchor_id_get(global::System.Runtime.InteropServices.HandleRef jarg1);
-
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanVideoSourceAttachmentInfo_attached_vr_device_id_set")]
   public static extern void MikanVideoSourceAttachmentInfo_attached_vr_device_id_set(global::System.Runtime.InteropServices.HandleRef jarg1, int jarg2);
 
@@ -1308,12 +1314,6 @@ class MikanClientPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanVideoSourceAttachmentInfo_vr_device_offset_xform_get")]
   public static extern global::System.IntPtr MikanVideoSourceAttachmentInfo_vr_device_offset_xform_get(global::System.Runtime.InteropServices.HandleRef jarg1);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanVideoSourceAttachmentInfo_camera_scale_set")]
-  public static extern void MikanVideoSourceAttachmentInfo_camera_scale_set(global::System.Runtime.InteropServices.HandleRef jarg1, float jarg2);
-
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanVideoSourceAttachmentInfo_camera_scale_get")]
-  public static extern float MikanVideoSourceAttachmentInfo_camera_scale_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_new_MikanVideoSourceAttachmentInfo")]
   public static extern global::System.IntPtr new_MikanVideoSourceAttachmentInfo();
@@ -1423,11 +1423,11 @@ class MikanClientPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanSpatialAnchorInfo_anchor_id_get")]
   public static extern int MikanSpatialAnchorInfo_anchor_id_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanSpatialAnchorInfo_anchor_xform_set")]
-  public static extern void MikanSpatialAnchorInfo_anchor_xform_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanSpatialAnchorInfo_world_transform_set")]
+  public static extern void MikanSpatialAnchorInfo_world_transform_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
 
-  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanSpatialAnchorInfo_anchor_xform_get")]
-  public static extern global::System.IntPtr MikanSpatialAnchorInfo_anchor_xform_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanSpatialAnchorInfo_world_transform_get")]
+  public static extern global::System.IntPtr MikanSpatialAnchorInfo_world_transform_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanSpatialAnchorInfo_anchor_name_set")]
   public static extern void MikanSpatialAnchorInfo_anchor_name_set(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
@@ -1440,6 +1440,18 @@ class MikanClientPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_delete_MikanSpatialAnchorInfo")]
   public static extern void delete_MikanSpatialAnchorInfo(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanScriptMessageInfo_content_set")]
+  public static extern void MikanScriptMessageInfo_content_set(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanScriptMessageInfo_content_get")]
+  public static extern string MikanScriptMessageInfo_content_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_new_MikanScriptMessageInfo")]
+  public static extern global::System.IntPtr new_MikanScriptMessageInfo();
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_delete_MikanScriptMessageInfo")]
+  public static extern void delete_MikanScriptMessageInfo(global::System.Runtime.InteropServices.HandleRef jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanVideoSourceNewFrameEvent_cameraForward_set")]
   public static extern void MikanVideoSourceNewFrameEvent_cameraForward_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
@@ -1546,6 +1558,12 @@ class MikanClientPINVOKE {
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanEvent_event_payload_anchor_pose_updated_get")]
   public static extern global::System.IntPtr MikanEvent_event_payload_anchor_pose_updated_get(global::System.Runtime.InteropServices.HandleRef jarg1);
 
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanEvent_event_payload_script_message_posted_set")]
+  public static extern void MikanEvent_event_payload_script_message_posted_set(global::System.Runtime.InteropServices.HandleRef jarg1, global::System.Runtime.InteropServices.HandleRef jarg2);
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_MikanEvent_event_payload_script_message_posted_get")]
+  public static extern global::System.IntPtr MikanEvent_event_payload_script_message_posted_get(global::System.Runtime.InteropServices.HandleRef jarg1);
+
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_new_MikanEvent_event_payload")]
   public static extern global::System.IntPtr new_MikanEvent_event_payload();
 
@@ -1605,6 +1623,9 @@ class MikanClientPINVOKE {
 
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_Mikan_FreeRenderTargetBuffers")]
   public static extern int Mikan_FreeRenderTargetBuffers();
+
+  [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_Mikan_SendScriptMessage")]
+  public static extern int Mikan_SendScriptMessage(global::System.Runtime.InteropServices.HandleRef jarg1);
 
   [global::System.Runtime.InteropServices.DllImport("MikanClient_swig_csharp", EntryPoint="CSharp_Mikan_Mikan_GetStencilList")]
   public static extern int Mikan_GetStencilList(global::System.Runtime.InteropServices.HandleRef jarg1);

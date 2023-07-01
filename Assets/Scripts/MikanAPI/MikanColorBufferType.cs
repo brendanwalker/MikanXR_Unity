@@ -13,7 +13,8 @@ namespace Mikan {
 public enum MikanColorBufferType {
   NOCOLOR,
   RGB24,
-  RGBA32
+  RGBA32,
+  BGRA32
 }
 
 }

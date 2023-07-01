@@ -33,7 +33,8 @@ public enum MikanResult {
   InvalidStencilID = -18,
   TooManyStencils = -19,
   InvalidAPI = -20,
-  SharedTextureError = -21
+  SharedTextureError = -21,
+  InvalidAnchorID = -22
 }
 
 }

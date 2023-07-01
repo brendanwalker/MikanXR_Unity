@@ -14,8 +14,9 @@ public enum MikanClientFeatures {
   RenderTarget_NONE = 0,
   RenderTarget_RGB24 = 1 << 0,
   RenderTarget_RGBA32 = 1 << 1,
-  RenderTarget_DEPTH16 = 1 << 2,
-  RenderTarget_DEPTH32 = 1 << 3
+  RenderTarget_BGRA32 = 1 << 2,
+  RenderTarget_DEPTH16 = 1 << 3,
+  RenderTarget_DEPTH32 = 1 << 4
 }
 
 }

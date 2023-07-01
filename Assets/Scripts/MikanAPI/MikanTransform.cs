@@ -10,20 +10,20 @@
 
 namespace Mikan {
 
-public class MikanAnchorPoseUpdateEvent : global::System.IDisposable {
+public class MikanTransform : global::System.IDisposable {
   private global::System.Runtime.InteropServices.HandleRef swigCPtr;
   protected bool swigCMemOwn;
 
-  internal MikanAnchorPoseUpdateEvent(global::System.IntPtr cPtr, bool cMemoryOwn) {
+  internal MikanTransform(global::System.IntPtr cPtr, bool cMemoryOwn) {
     swigCMemOwn = cMemoryOwn;
     swigCPtr = new global::System.Runtime.InteropServices.HandleRef(this, cPtr);
   }
 
-  internal static global::System.Runtime.InteropServices.HandleRef getCPtr(MikanAnchorPoseUpdateEvent obj) {
+  internal static global::System.Runtime.InteropServices.HandleRef getCPtr(MikanTransform obj) {
     return (obj == null) ? new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero) : obj.swigCPtr;
   }
 
-  internal static global::System.Runtime.InteropServices.HandleRef swigRelease(MikanAnchorPoseUpdateEvent obj) {
+  internal static global::System.Runtime.InteropServices.HandleRef swigRelease(MikanTransform obj) {
     if (obj != null) {
       if (!obj.swigCMemOwn)
         throw new global::System.ApplicationException("Cannot release ownership as memory is not owned");
@@ -36,7 +36,7 @@ public class MikanAnchorPoseUpdateEvent : global::System.IDisposable {
     }
   }
 
-  ~MikanAnchorPoseUpdateEvent() {
+  ~MikanTransform() {
     Dispose(false);
   }
 
@@ -50,35 +50,47 @@ public class MikanAnchorPoseUpdateEvent : global::System.IDisposable {
       if (swigCPtr.Handle != global::System.IntPtr.Zero) {
         if (swigCMemOwn) {
           swigCMemOwn = false;
-          MikanClientPINVOKE.delete_MikanAnchorPoseUpdateEvent(swigCPtr);
+          MikanClientPINVOKE.delete_MikanTransform(swigCPtr);
         }
         swigCPtr = new global::System.Runtime.InteropServices.HandleRef(null, global::System.IntPtr.Zero);
       }
     }
   }
 
-  public MikanTransform transform {
+  public MikanVector3f scale {
     set {
-      MikanClientPINVOKE.MikanAnchorPoseUpdateEvent_transform_set(swigCPtr, MikanTransform.getCPtr(value));
+      MikanClientPINVOKE.MikanTransform_scale_set(swigCPtr, MikanVector3f.getCPtr(value));
     } 
     get {
-      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanAnchorPoseUpdateEvent_transform_get(swigCPtr);
-      MikanTransform ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanTransform(cPtr, false);
+      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanTransform_scale_get(swigCPtr);
+      MikanVector3f ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanVector3f(cPtr, false);
       return ret;
     } 
   }
 
-  public int anchor_id {
+  public MikanQuatf rotation {
     set {
-      MikanClientPINVOKE.MikanAnchorPoseUpdateEvent_anchor_id_set(swigCPtr, value);
+      MikanClientPINVOKE.MikanTransform_rotation_set(swigCPtr, MikanQuatf.getCPtr(value));
     } 
     get {
-      int ret = MikanClientPINVOKE.MikanAnchorPoseUpdateEvent_anchor_id_get(swigCPtr);
+      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanTransform_rotation_get(swigCPtr);
+      MikanQuatf ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanQuatf(cPtr, false);
       return ret;
     } 
   }
 
-  public MikanAnchorPoseUpdateEvent() : this(MikanClientPINVOKE.new_MikanAnchorPoseUpdateEvent(), true) {
+  public MikanVector3f position {
+    set {
+      MikanClientPINVOKE.MikanTransform_position_set(swigCPtr, MikanVector3f.getCPtr(value));
+    } 
+    get {
+      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanTransform_position_get(swigCPtr);
+      MikanVector3f ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanVector3f(cPtr, false);
+      return ret;
+    } 
+  }
+
+  public MikanTransform() : this(MikanClientPINVOKE.new_MikanTransform(), true) {
   }
 
 }

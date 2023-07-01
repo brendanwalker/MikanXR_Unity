@@ -77,46 +77,13 @@ public class MikanStencilQuad : global::System.IDisposable {
     } 
   }
 
-  public MikanVector3f quad_center {
+  public MikanTransform relative_transform {
     set {
-      MikanClientPINVOKE.MikanStencilQuad_quad_center_set(swigCPtr, MikanVector3f.getCPtr(value));
+      MikanClientPINVOKE.MikanStencilQuad_relative_transform_set(swigCPtr, MikanTransform.getCPtr(value));
     } 
     get {
-      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanStencilQuad_quad_center_get(swigCPtr);
-      MikanVector3f ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanVector3f(cPtr, false);
-      return ret;
-    } 
-  }
-
-  public MikanVector3f quad_x_axis {
-    set {
-      MikanClientPINVOKE.MikanStencilQuad_quad_x_axis_set(swigCPtr, MikanVector3f.getCPtr(value));
-    } 
-    get {
-      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanStencilQuad_quad_x_axis_get(swigCPtr);
-      MikanVector3f ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanVector3f(cPtr, false);
-      return ret;
-    } 
-  }
-
-  public MikanVector3f quad_y_axis {
-    set {
-      MikanClientPINVOKE.MikanStencilQuad_quad_y_axis_set(swigCPtr, MikanVector3f.getCPtr(value));
-    } 
-    get {
-      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanStencilQuad_quad_y_axis_get(swigCPtr);
-      MikanVector3f ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanVector3f(cPtr, false);
-      return ret;
-    } 
-  }
-
-  public MikanVector3f quad_normal {
-    set {
-      MikanClientPINVOKE.MikanStencilQuad_quad_normal_set(swigCPtr, MikanVector3f.getCPtr(value));
-    } 
-    get {
-      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanStencilQuad_quad_normal_get(swigCPtr);
-      MikanVector3f ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanVector3f(cPtr, false);
+      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanStencilQuad_relative_transform_get(swigCPtr);
+      MikanTransform ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanTransform(cPtr, false);
       return ret;
     } 
   }

@@ -77,46 +77,13 @@ public class MikanStencilBox : global::System.IDisposable {
     } 
   }
 
-  public MikanVector3f box_center {
+  public MikanTransform relative_transform {
     set {
-      MikanClientPINVOKE.MikanStencilBox_box_center_set(swigCPtr, MikanVector3f.getCPtr(value));
+      MikanClientPINVOKE.MikanStencilBox_relative_transform_set(swigCPtr, MikanTransform.getCPtr(value));
     } 
     get {
-      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanStencilBox_box_center_get(swigCPtr);
-      MikanVector3f ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanVector3f(cPtr, false);
-      return ret;
-    } 
-  }
-
-  public MikanVector3f box_x_axis {
-    set {
-      MikanClientPINVOKE.MikanStencilBox_box_x_axis_set(swigCPtr, MikanVector3f.getCPtr(value));
-    } 
-    get {
-      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanStencilBox_box_x_axis_get(swigCPtr);
-      MikanVector3f ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanVector3f(cPtr, false);
-      return ret;
-    } 
-  }
-
-  public MikanVector3f box_y_axis {
-    set {
-      MikanClientPINVOKE.MikanStencilBox_box_y_axis_set(swigCPtr, MikanVector3f.getCPtr(value));
-    } 
-    get {
-      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanStencilBox_box_y_axis_get(swigCPtr);
-      MikanVector3f ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanVector3f(cPtr, false);
-      return ret;
-    } 
-  }
-
-  public MikanVector3f box_z_axis {
-    set {
-      MikanClientPINVOKE.MikanStencilBox_box_z_axis_set(swigCPtr, MikanVector3f.getCPtr(value));
-    } 
-    get {
-      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanStencilBox_box_z_axis_get(swigCPtr);
-      MikanVector3f ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanVector3f(cPtr, false);
+      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanStencilBox_relative_transform_get(swigCPtr);
+      MikanTransform ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanTransform(cPtr, false);
       return ret;
     } 
   }

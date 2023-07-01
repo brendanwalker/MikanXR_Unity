@@ -81,5 +81,15 @@ namespace Mikan
             // Negate z-component to convert from Mikan to Unity Coordinate system
             return new Vector3() { x = v.x, y = v.y, z = -v.z };
         }
+
+        public static Quaternion MikanQuatfToQuaternion(MikanQuatf q)
+        {
+            return new Quaternion() {x = q.x, y = q.y, z= -q.z, w= q.w};
+        }
+
+        public static MikanQuatf MikanQuatfToQuaternion(Quaternion q)
+        {
+            return new MikanQuatf() {x = q.x, y = q.y, z= -q.z, w= q.w};
+        }        
     }
 }

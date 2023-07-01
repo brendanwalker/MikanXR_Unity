@@ -18,7 +18,7 @@ namespace Mikan
         {
             if (MikanComponent.Instance != null)
             {
-                MikanComponent.Instance.ConnectEvent.AddListener(OnMikanConnected);
+                MikanComponent.Instance.OnConnectEvent.AddListener(OnMikanConnected);
                 MikanComponent.Instance.addAnchorPoseListener(_anchorId, AnchorPoseChanged);
             }
         }
@@ -44,14 +44,16 @@ namespace Mikan
                 if (MikanClient.Mikan_FindSpatialAnchorInfoByName(AnchorName, anchorInfo) == MikanResult.Success)
                 {
                     _anchorId = anchorInfo.anchor_id;
-                    AnchorPoseChanged(anchorInfo.anchor_xform);
+                    AnchorPoseChanged(anchorInfo.world_transform);
                 }
             }
         }
 
-        void AnchorPoseChanged(MikanMatrix4f xform)
+        void AnchorPoseChanged(MikanTransform xform)
         {
-            MikanMath.SetTransformFromMatrix(this.transform, ref xform);
+            transform.localPosition= MikanMath.MikanVector3fToVector3(xform.position);
+            transform.localRotation= MikanMath.MikanQuatfToQuaternion(xform.rotation);
+            transform.localScale= MikanMath.MikanVector3fToVector3(xform.scale);
         }
     }
 }

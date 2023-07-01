@@ -57,16 +57,6 @@ public class MikanVideoSourceAttachmentInfo : global::System.IDisposable {
     }
   }
 
-  public int parent_anchor_id {
-    set {
-      MikanClientPINVOKE.MikanVideoSourceAttachmentInfo_parent_anchor_id_set(swigCPtr, value);
-    } 
-    get {
-      int ret = MikanClientPINVOKE.MikanVideoSourceAttachmentInfo_parent_anchor_id_get(swigCPtr);
-      return ret;
-    } 
-  }
-
   public int attached_vr_device_id {
     set {
       MikanClientPINVOKE.MikanVideoSourceAttachmentInfo_attached_vr_device_id_set(swigCPtr, value);
@@ -84,16 +74,6 @@ public class MikanVideoSourceAttachmentInfo : global::System.IDisposable {
     get {
       global::System.IntPtr cPtr = MikanClientPINVOKE.MikanVideoSourceAttachmentInfo_vr_device_offset_xform_get(swigCPtr);
       MikanMatrix4f ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanMatrix4f(cPtr, false);
-      return ret;
-    } 
-  }
-
-  public float camera_scale {
-    set {
-      MikanClientPINVOKE.MikanVideoSourceAttachmentInfo_camera_scale_set(swigCPtr, value);
-    } 
-    get {
-      float ret = MikanClientPINVOKE.MikanVideoSourceAttachmentInfo_camera_scale_get(swigCPtr);
       return ret;
     } 
   }

@@ -90,6 +90,17 @@ public class MikanEvent_event_payload : global::System.IDisposable {
     } 
   }
 
+  public MikanScriptMessageInfo script_message_posted {
+    set {
+      MikanClientPINVOKE.MikanEvent_event_payload_script_message_posted_set(swigCPtr, MikanScriptMessageInfo.getCPtr(value));
+    } 
+    get {
+      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanEvent_event_payload_script_message_posted_get(swigCPtr);
+      MikanScriptMessageInfo ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanScriptMessageInfo(cPtr, false);
+      return ret;
+    } 
+  }
+
   public MikanEvent_event_payload() : this(MikanClientPINVOKE.new_MikanEvent_event_payload(), true) {
   }
 

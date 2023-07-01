@@ -19,9 +19,7 @@ namespace Mikan
     using MikanSpatialAnchorID = System.Int32;
 
     [System.Serializable]
-    public class MikanPoseUpdateEvent : UnityEvent<MikanMatrix4f>
-    {
-    }
+    public class MikanPoseUpdateEvent : UnityEvent<MikanTransform> { }
 
     [HelpURL("https://github.com/MikanXR/MikanXR_Unity")]
     [AddComponentMenu("MikanXR/Mikan")]
@@ -32,8 +30,9 @@ namespace Mikan
         private MikanClientInfo _clientInfo;
         private MikanRenderTargetMemory _renderTargetMemory;
         private MikanStencilQuad _stencilQuad;
-        private Matrix4x4 _originSpatialAnchorXform = Matrix4x4.identity;
+        private Transform _originSpatialAnchorXform;
         private RenderTexture _renderTexture;
+
         //private Texture2D _externalTexture;
         private AsyncGPUReadbackRequest _readbackRequest = new AsyncGPUReadbackRequest();
 
@@ -42,33 +41,28 @@ namespace Mikan
         private float _mikanReconnectTimeout = 0.0f;
         private ulong _lastReceivedVideoSourceFrame = 0;
         private ulong _lastRenderedFrame = 0;
+        private Quaternion _lastCameraRotation = new Quaternion();
+        private Vector3 _lastCameraPosition= new Vector3();
+        private float _sceneScale= 1.0f;
 
-        public UnityEvent _connectEvent = new UnityEvent();
-        public UnityEvent ConnectEvent
-        {
-            get { return _connectEvent; } 
-        }
+        public UnityEvent OnConnectEvent;
+        public UnityEvent OnDisconnectEvent;
+        public event Action<string> OnMessageEvent;
 
-        public UnityEvent _disconnectEvent = new UnityEvent();
-        public UnityEvent DisconnectEvent
-        {
-            get { return _disconnectEvent; }
-        }
-
-        private Dictionary<MikanSpatialAnchorID, MikanPoseUpdateEvent> _anchorPoseEvents = new Dictionary<MikanSpatialAnchorID, MikanPoseUpdateEvent>();
+        private Dictionary<MikanSpatialAnchorID, MikanPoseUpdateEvent> _anchorPoseEvents =
+            new Dictionary<MikanSpatialAnchorID, MikanPoseUpdateEvent>();
 
         public Color BackgroundColorKey = new Color(0.0f, 0.0f, 0.0f, 0.0f);
 
         public static MikanComponent Instance
         {
-            get
-            {
-                return _instance;
-            }
+            get { return _instance; }
         }
 
         [Tooltip("Camera prefab for customized rendering.")]
-        [SerializeField] Camera _MRCamera = null;
+        [SerializeField]
+        Camera _MRCamera = null;
+
         /// <summary>
         /// Camera prefab for customized rendering.
         /// </summary>
@@ -76,14 +70,8 @@ namespace Mikan
         /// </remarks>
         public Camera MRCamera
         {
-            get
-            {
-                return _MRCamera;
-            }
-            set
-            {
-                _MRCamera = value;
-            }
+            get { return _MRCamera; }
+            set { _MRCamera = value; }
         }
 
         private void Awake()
@@ -99,7 +87,7 @@ namespace Mikan
                 _apiInitialized = false;
 
                 MikanClientGraphicsApi graphicsAPI = MikanClientGraphicsApi.UNKNOWN;
-                switch(SystemInfo.graphicsDeviceType)
+                switch (SystemInfo.graphicsDeviceType)
                 {
                     case GraphicsDeviceType.Direct3D11:
                         graphicsAPI = MikanClientGraphicsApi.Direct3D11;
@@ -118,14 +106,14 @@ namespace Mikan
                     engineVersion = Application.unityVersion,
                     applicationName = Application.productName,
                     applicationVersion = Application.version,
-    #if UNITY_2017_2_OR_NEWER
+#if UNITY_2017_2_OR_NEWER
                     xrDeviceName = XRSettings.loadedDeviceName,
-    #endif
+#endif
                     graphicsAPI = graphicsAPI,
                     mikanSdkVersion = MikanClient.MIKAN_CLIENT_VERSION_STRING,
                 };
 
-                MikanResult result= MikanClient.Mikan_Initialize(MikanLogLevel.Info, OnMikanLog);
+                MikanResult result = MikanClient.Mikan_Initialize(MikanLogLevel.Info, OnMikanLog);
                 if (result == MikanResult.Success)
                 {
                     _apiInitialized = true;
@@ -136,7 +124,7 @@ namespace Mikan
         void OnMikanLog(int log_level, string log_message)
         {
             MikanLogLevel mikanLogLevel = (MikanLogLevel)log_level;
-            switch(mikanLogLevel)
+            switch (mikanLogLevel)
             {
                 case MikanLogLevel.Trace:
                 case MikanLogLevel.Debug:
@@ -148,7 +136,7 @@ namespace Mikan
                     break;
                 case MikanLogLevel.Error:
                     Debug.LogError(log_message);
-                    break;                            
+                    break;
                 case MikanLogLevel.Fatal:
                     Debug.LogAssertion(log_message);
                     break;
@@ -159,7 +147,6 @@ namespace Mikan
         {
             if (_enabled)
             {
-
                 if (_apiInitialized)
                 {
                     if (!_readbackRequest.done)
@@ -184,40 +171,45 @@ namespace Mikan
                 MikanEvent mikanEvent = new MikanEvent();
                 while (MikanClient.Mikan_PollNextEvent(mikanEvent) == MikanResult.Success)
                 {
-                    switch(mikanEvent.event_type)
+                    switch (mikanEvent.event_type)
                     {
-                    case MikanEventType.connected:
-                        reallocateRenderBuffers();
-                        //setupStencils();
-                        updateCameraProjectionMatrix();
-                        _connectEvent.Invoke();
-                        break;
-                    case MikanEventType.disconnected:
-                        _disconnectEvent.Invoke();
-                        break;
-                    case MikanEventType.videoSourceOpened:
-                        reallocateRenderBuffers();
-                        updateCameraProjectionMatrix();
-                        break;
-                    case MikanEventType.videoSourceClosed:
-                        break;
-                    case MikanEventType.videoSourceNewFrame:
-                        processNewVideoSourceFrame(mikanEvent.event_payload.video_source_new_frame);
-    					break;
-				    case MikanEventType.videoSourceModeChanged:
-				    case MikanEventType.videoSourceIntrinsicsChanged:
-					   reallocateRenderBuffers();
-					   updateCameraProjectionMatrix();
-					   break;
-				    case MikanEventType.videoSourceAttachmentChanged:
-					   break;
-				    case MikanEventType.vrDevicePoseUpdated:
-					   break;
-				    case MikanEventType.anchorPoseUpdated:
-                       updateAnchorPose(mikanEvent.event_payload.anchor_pose_updated);
-					   break;
-				    case MikanEventType.anchorListUpdated:
-					   break;
+                        case MikanEventType.connected:
+                            reallocateRenderBuffers();
+                            //setupStencils();
+                            updateCameraProjectionMatrix();
+                            OnConnectEvent.Invoke();
+                            break;
+                        case MikanEventType.disconnected:
+                            OnDisconnectEvent.Invoke();
+                            break;
+                        case MikanEventType.videoSourceOpened:
+                            reallocateRenderBuffers();
+                            updateCameraProjectionMatrix();
+                            break;
+                        case MikanEventType.videoSourceClosed:
+                            break;
+                        case MikanEventType.videoSourceNewFrame:
+                            processNewVideoSourceFrame(
+                                mikanEvent.event_payload.video_source_new_frame
+                            );
+                            break;
+                        case MikanEventType.videoSourceModeChanged:
+                        case MikanEventType.videoSourceIntrinsicsChanged:
+                            reallocateRenderBuffers();
+                            updateCameraProjectionMatrix();
+                            break;
+                        case MikanEventType.videoSourceAttachmentChanged:
+                            break;
+                        case MikanEventType.vrDevicePoseUpdated:
+                            break;
+                        case MikanEventType.anchorPoseUpdated:
+                            updateAnchorPose(mikanEvent.event_payload.anchor_pose_updated);
+                            break;
+                        case MikanEventType.anchorListUpdated:
+                            break;
+                        case MikanEventType.scriptMessagePosted:
+                            processScriptMessage(mikanEvent.event_payload.script_message_posted);
+                            break;
                     }
                 }
             }
@@ -250,28 +242,44 @@ namespace Mikan
             if (stencilList.stencil_count > 0)
                 return;
 
-            // Get the origin spatial anchor to build the stencil scene around
-            MikanSpatialAnchorInfo originSpatialAnchor = new MikanSpatialAnchorInfo();
-            if (MikanClient.Mikan_FindSpatialAnchorInfoByName("origin", originSpatialAnchor) == MikanResult.Success)
+            if (_originSpatialAnchorXform != null)
             {
-                _originSpatialAnchorXform = MikanMath.MikanMatrix4fToMatrix4x4(originSpatialAnchor.anchor_xform);
-            }
-            else
-            {
-                _originSpatialAnchorXform = Matrix4x4.identity;
+                // Get the origin spatial anchor to build the stencil scene around
+                MikanSpatialAnchorInfo originSpatialAnchor = new MikanSpatialAnchorInfo();
+                if (
+                    MikanClient.Mikan_FindSpatialAnchorInfoByName("origin", originSpatialAnchor)
+                    == MikanResult.Success
+                )
+                {
+                    _originSpatialAnchorXform.localPosition = MikanMath.MikanVector3fToVector3(
+                        originSpatialAnchor.world_transform.position
+                    );
+                    _originSpatialAnchorXform.localRotation = MikanMath.MikanQuatfToQuaternion(
+                        originSpatialAnchor.world_transform.rotation
+                    );
+                    _originSpatialAnchorXform.localScale = MikanMath.MikanVector3fToVector3(
+                        originSpatialAnchor.world_transform.scale
+                    );
+                }
             }
         }
 
+        void processScriptMessage(MikanScriptMessageInfo scriptMessage)
+        {
+            OnMessageEvent?.Invoke(scriptMessage.content);
+        }
+
         void processNewVideoSourceFrame(MikanVideoSourceNewFrameEvent newFrameEvent)
-	    {
-		    if (newFrameEvent.frame == _lastReceivedVideoSourceFrame)
-		    	return;
+        {
+            if (newFrameEvent.frame == _lastReceivedVideoSourceFrame)
+                return;
 
             // Apply the camera pose received
             setCameraPose(
                 MikanMath.MikanVector3fToVector3(newFrameEvent.cameraForward),
                 MikanMath.MikanVector3fToVector3(newFrameEvent.cameraUp),
-                MikanMath.MikanVector3fToVector3(newFrameEvent.cameraPosition));
+                MikanMath.MikanVector3fToVector3(newFrameEvent.cameraPosition)
+            );
 
             // Render out a new frame
             render(newFrameEvent.frame);
@@ -280,14 +288,31 @@ namespace Mikan
             _lastReceivedVideoSourceFrame = newFrameEvent.frame;
         }
 
+        public float getSceneScale()
+        {
+            return _sceneScale;
+        }
+
+        public void setSceneScale(float newScale)
+        {
+            _sceneScale= newScale;
+            updateCameraTransform();
+        }
+
         void setCameraPose(Vector3 cameraForward, Vector3 cameraUp, Vector3 cameraPosition)
         {
-            if (_MRCamera == null)
-                return;
+            _lastCameraPosition= cameraPosition;
+            _lastCameraRotation= Quaternion.LookRotation(cameraForward, cameraUp);
+            updateCameraTransform();
+        }
 
-            // Decompose Matrix4x4 into a quaternion and an position
-            _MRCamera.transform.localRotation = Quaternion.LookRotation(cameraForward, cameraUp);
-            _MRCamera.transform.localPosition = cameraPosition;
+        void updateCameraTransform()
+        {
+            if (_MRCamera != null)
+            {
+                _MRCamera.transform.localRotation = _lastCameraRotation;
+                _MRCamera.transform.localPosition = _lastCameraPosition * _sceneScale;            
+            }
         }
 
         void reallocateRenderBuffers()
@@ -303,10 +328,11 @@ namespace Mikan
                 MikanRenderTargetDescriptor desc = new MikanRenderTargetDescriptor();
                 desc.width = (uint)mode.resolution_x;
                 desc.height = (uint)mode.resolution_y;
-                desc.color_key = new MikanColorRGB() { 
-                    r= BackgroundColorKey.r, 
-                    g= BackgroundColorKey.g, 
-                    b= BackgroundColorKey.b
+                desc.color_key = new MikanColorRGB()
+                {
+                    r = BackgroundColorKey.r,
+                    g = BackgroundColorKey.g,
+                    b = BackgroundColorKey.b
                 };
                 desc.color_buffer_type = MikanColorBufferType.RGBA32;
                 desc.depth_buffer_type = MikanDepthBufferType.NODEPTH;
@@ -323,14 +349,21 @@ namespace Mikan
 
             if (width <= 0 || height <= 0)
             {
-                Debug.LogError("Mikan: Unable to create render texture. Texture dimension must be higher than zero.");
+                Debug.LogError(
+                    "Mikan: Unable to create render texture. Texture dimension must be higher than zero."
+                );
                 return false;
             }
 
             //_externalTexture = Texture2D.CreateExternalTexture(width, height, TextureFormat.RGBA32, false, true, renderTargetMemory.color_texture_pointer);
 
             int depthBufferPrecision = 0;
-            _renderTexture = new RenderTexture(width, height, depthBufferPrecision, RenderTextureFormat.ARGB32)
+            _renderTexture = new RenderTexture(
+                width,
+                height,
+                depthBufferPrecision,
+                RenderTextureFormat.ARGB32
+            )
             {
                 antiAliasing = 1,
                 wrapMode = TextureWrapMode.Clamp,
@@ -343,7 +376,6 @@ namespace Mikan
                 Debug.LogError("LIV: Unable to create render texture.");
                 return false;
             }
-
 
             return bSuccess;
         }
@@ -361,7 +393,10 @@ namespace Mikan
         void updateCameraProjectionMatrix()
         {
             MikanVideoSourceIntrinsics videoSourceIntrinsics = new MikanVideoSourceIntrinsics();
-            if (MikanClient.Mikan_GetVideoSourceIntrinsics(videoSourceIntrinsics) == MikanResult.Success)
+            if (
+                MikanClient.Mikan_GetVideoSourceIntrinsics(videoSourceIntrinsics)
+                == MikanResult.Success
+            )
             {
                 MikanMonoIntrinsics monoIntrinsics = videoSourceIntrinsics.intrinsics.mono;
                 float videoSourcePixelWidth = (float)monoIntrinsics.pixel_width;
@@ -384,7 +419,10 @@ namespace Mikan
             }
         }
 
-        public void addAnchorPoseListener(MikanSpatialAnchorID anchor_id, UnityAction<MikanMatrix4f> call)
+        public void addAnchorPoseListener(
+            MikanSpatialAnchorID anchor_id,
+            UnityAction<MikanTransform> call
+        )
         {
             MikanPoseUpdateEvent anchorEvent;
 
@@ -397,7 +435,10 @@ namespace Mikan
             anchorEvent.AddListener(call);
         }
 
-        public void removeAnchorPoseListener(MikanSpatialAnchorID anchor_id, UnityAction<MikanMatrix4f> call)
+        public void removeAnchorPoseListener(
+            MikanSpatialAnchorID anchor_id,
+            UnityAction<MikanTransform> call
+        )
         {
             MikanPoseUpdateEvent anchorEvent;
 
@@ -419,8 +460,10 @@ namespace Mikan
             _MRCamera.Render();
             _MRCamera.targetTexture = null;
 
-            if (_clientInfo.graphicsAPI == MikanClientGraphicsApi.Direct3D11 ||
-                _clientInfo.graphicsAPI == MikanClientGraphicsApi.OpenGL)
+            if (
+                _clientInfo.graphicsAPI == MikanClientGraphicsApi.Direct3D11
+                || _clientInfo.graphicsAPI == MikanClientGraphicsApi.OpenGL
+            )
             {
                 IntPtr textureNativePtr = _renderTexture.GetNativeTexturePtr();
 
@@ -432,7 +475,11 @@ namespace Mikan
                 if (_renderTargetMemory.color_buffer != IntPtr.Zero)
                 {
                     // Slow texture read-back / shared CPU memory transfer
-                    _readbackRequest = AsyncGPUReadback.Request(_renderTexture, 0, ReadbackCompleted);
+                    _readbackRequest = AsyncGPUReadback.Request(
+                        _renderTexture,
+                        0,
+                        ReadbackCompleted
+                    );
                 }
             }
         }
@@ -443,9 +490,11 @@ namespace Mikan
             {
                 NativeArray<byte> buffer = request.GetData<byte>();
 
-                if (buffer.Length > 0 &&
-                    _renderTargetMemory.color_buffer != IntPtr.Zero &&
-                    _renderTargetMemory.color_buffer_size == buffer.Length)
+                if (
+                    buffer.Length > 0
+                    && _renderTargetMemory.color_buffer != IntPtr.Zero
+                    && _renderTargetMemory.color_buffer_size == buffer.Length
+                )
                 {
                     unsafe
                     {

@@ -22,7 +22,8 @@ public enum MikanEventType {
   vrDevicePoseUpdated,
   vrDeviceListUpdated,
   anchorPoseUpdated,
-  anchorListUpdated
+  anchorListUpdated,
+  scriptMessagePosted
 }
 
 }

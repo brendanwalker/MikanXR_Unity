@@ -67,13 +67,13 @@ public class MikanSpatialAnchorInfo : global::System.IDisposable {
     } 
   }
 
-  public MikanMatrix4f anchor_xform {
+  public MikanTransform world_transform {
     set {
-      MikanClientPINVOKE.MikanSpatialAnchorInfo_anchor_xform_set(swigCPtr, MikanMatrix4f.getCPtr(value));
+      MikanClientPINVOKE.MikanSpatialAnchorInfo_world_transform_set(swigCPtr, MikanTransform.getCPtr(value));
     } 
     get {
-      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanSpatialAnchorInfo_anchor_xform_get(swigCPtr);
-      MikanMatrix4f ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanMatrix4f(cPtr, false);
+      global::System.IntPtr cPtr = MikanClientPINVOKE.MikanSpatialAnchorInfo_world_transform_get(swigCPtr);
+      MikanTransform ret = (cPtr == global::System.IntPtr.Zero) ? null : new MikanTransform(cPtr, false);
       return ret;
     } 
   }
