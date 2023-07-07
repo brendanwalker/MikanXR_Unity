@@ -10,50 +10,68 @@ namespace Mikan
     public class MikanAnchor : MonoBehaviour
     {
         private MikanSpatialAnchorID _anchorId = MikanClient.INVALID_MIKAN_ID;
-
-        public string AnchorName;
-
-        // Start is called before the first frame update
-        void Start()
-        {
-            if (MikanComponent.Instance != null)
-            {
-                MikanComponent.Instance.OnConnectEvent.AddListener(OnMikanConnected);
-                MikanComponent.Instance.addAnchorPoseListener(_anchorId, AnchorPoseChanged);
-            }
+        public MikanSpatialAnchorID AnchorID { 
+            get { return _anchorId; } 
+        }
+        
+        [SerializeField]
+        private string _anchorName= "";
+        public string AnchorName { 
+            get { return _anchorName; } 
+            set { _anchorName = value; }
         }
 
-        private void OnDestroy()
+        public MikanScene GetParentScene() 
         {
-            if (MikanComponent.Instance != null)
-            {
-                MikanComponent.Instance.removeAnchorPoseListener(_anchorId, AnchorPoseChanged);
-            }
+            return gameObject.GetComponentInParent<MikanScene>();
         }
 
-        void OnMikanConnected()
+        public void FindAnchorInfo()
         {
-            FindAnchorInfo();
-        }    
+            MikanScene scene = GetParentScene();
 
-        void FindAnchorInfo()
-        {
-            if (MikanClient.Mikan_GetIsConnected())
+            if (scene != null)
             {
-                MikanSpatialAnchorInfo anchorInfo = new MikanSpatialAnchorInfo();
-                if (MikanClient.Mikan_FindSpatialAnchorInfoByName(AnchorName, anchorInfo) == MikanResult.Success)
+                MikanAnchorInfo mikanAnchorInfo = scene.GetMikanAnchorInfoByName(_anchorName);
+
+                if (mikanAnchorInfo != null)
                 {
-                    _anchorId = anchorInfo.anchor_id;
-                    AnchorPoseChanged(anchorInfo.world_transform);
+                    _anchorId= mikanAnchorInfo.AnchorId;
+
+                    // Update our scene transform now that we have an assigned anchor
+                    UpdateSceneTransform();
                 }
             }
         }
 
-        void AnchorPoseChanged(MikanTransform xform)
+        public void UpdateSceneTransform()
         {
-            transform.localPosition= MikanMath.MikanVector3fToVector3(xform.position);
-            transform.localRotation= MikanMath.MikanQuatfToQuaternion(xform.rotation);
-            transform.localScale= MikanMath.MikanVector3fToVector3(xform.scale);
+            if (AnchorID != MikanClient.INVALID_MIKAN_ID)
+            {
+                MikanScene ownerScene= GetParentScene();
+
+                if (ownerScene != null)
+                {
+                    MikanAnchorInfo mikanAnchorInfo = ownerScene.GetMikanAnchorInfoById(AnchorID);
+
+                    if (mikanAnchorInfo != null)
+                    {
+                        // Get the anchor transform in Mikan Space
+                        Matrix4x4 MikanSpaceTransform = mikanAnchorInfo.MikanSpaceTransform;
+
+                        // Get the conversion from the scene to go from Mikan to Scene space
+                        Matrix4x4 MikanToSceneXform = ownerScene.MikanToSceneTransform;
+
+                        // Compute the scene space transform
+                        Matrix4x4 SceneSpaceTransform = MikanToSceneXform * MikanSpaceTransform;
+
+                        // Update the relative transform of the anchor
+						transform.localPosition = MikanMath.ExtractTranslationFromMatrix(SceneSpaceTransform);
+						transform.localRotation = MikanMath.ExtractRotationFromMatrix(SceneSpaceTransform);
+						transform.localScale = MikanMath.ExtractScaleFromMatrix(SceneSpaceTransform);
+					}
+                }
+            }
         }
     }
 }

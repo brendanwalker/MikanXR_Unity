@@ -1,10 +1,11 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
+using Mikan;
 using UnityEngine;
 
 public class MikanScriptEventHandler : MonoBehaviour
 {
-    public Mikan.MikanComponent mikanComponent;
+    public MikanManager mikanManager;
+    public MikanScene mikanScene;
     public AnimationCurve cameraScaleCurve;
     public float cameraScaleTime = 1.0f;
 
@@ -13,12 +14,12 @@ public class MikanScriptEventHandler : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (mikanComponent != null)
+        if (mikanManager != null)
         {
             float startScale = cameraScaleCurve.Evaluate(0);
 
-            mikanComponent.OnMessageEvent += OnMikanMessage;
-            mikanComponent.setSceneScale(startScale);
+            mikanManager.OnMessageEvent += OnMikanMessage;
+            mikanScene.CameraPositionScale= startScale;
         }
     }
 
@@ -29,11 +30,11 @@ public class MikanScriptEventHandler : MonoBehaviour
     {
         if (message == "resetCameraZoom")
         {
-            if (mikanComponent != null)
+            if (mikanManager != null)
             {
                 float startScale = cameraScaleCurve.Evaluate(0);
 
-                mikanComponent.setSceneScale(startScale);
+                mikanScene.CameraPositionScale= startScale;
             }
         }
         else if (message == "startCameraZoom")
@@ -59,22 +60,22 @@ public class MikanScriptEventHandler : MonoBehaviour
         float startScale = cameraScaleCurve.Evaluate(0);
         float endScale = cameraScaleCurve.Evaluate(1);
 
-        if (mikanComponent != null)
-            mikanComponent.setSceneScale(startScale);
+        if (mikanScene != null)
+            mikanScene.CameraPositionScale= startScale;
 
         for (float time = 0; time < cameraScaleTime; time += Time.unscaledDeltaTime)
         {
             float t = time / cameraScaleTime;
             float scaleValue = cameraScaleCurve.Evaluate(t);
 
-            if (mikanComponent != null)
-                mikanComponent.setSceneScale(scaleValue);
+            if (mikanScene != null)
+                mikanScene.CameraPositionScale= scaleValue;
 
             yield return null;
         }
 
-        if (mikanComponent != null)
-            mikanComponent.setSceneScale(endScale);
+        if (mikanScene != null)
+            mikanScene.CameraPositionScale= endScale;
 
         _currentRoutine = null;
     }

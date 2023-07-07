@@ -29,7 +29,7 @@ namespace Mikan
 			return m;
 		}
 
-        public static Vector3 ExtractTranslationFromMatrix(ref Matrix4x4 matrix)
+        public static Vector3 ExtractTranslationFromMatrix(Matrix4x4 matrix)
         {
             Vector3 translate;
             translate.x = matrix.m03;
@@ -38,7 +38,7 @@ namespace Mikan
             return translate;
         }
 
-        public static Quaternion ExtractRotationFromMatrix(ref Matrix4x4 matrix)
+        public static Quaternion ExtractRotationFromMatrix(Matrix4x4 matrix)
         {
             Vector3 forward;
             forward.x = matrix.m02;
@@ -53,7 +53,7 @@ namespace Mikan
             return Quaternion.LookRotation(forward, upwards);
         }
 
-        public static Vector3 ExtractScaleFromMatrix(ref Matrix4x4 matrix)
+        public static Vector3 ExtractScaleFromMatrix(Matrix4x4 matrix)
         {
             Vector3 scale;
             scale.x = new Vector4(matrix.m00, matrix.m10, matrix.m20, matrix.m30).magnitude;
@@ -62,13 +62,13 @@ namespace Mikan
             return scale;
         }
 
-        public static void SetTransformFromMatrix(Transform transform, ref MikanMatrix4f xform)
+        public static void SetTransformFromMatrix(Transform transform, MikanMatrix4f xform)
         {
             Matrix4x4 matrix = MikanMatrix4fToMatrix4x4(xform);
 
-            transform.localPosition = ExtractTranslationFromMatrix(ref matrix);
-            transform.localRotation = ExtractRotationFromMatrix(ref matrix);
-            //transform.localScale = ExtractScaleFromMatrix(ref matrix);
+            transform.localPosition = ExtractTranslationFromMatrix(matrix);
+            transform.localRotation = ExtractRotationFromMatrix(matrix);
+            transform.localScale = ExtractScaleFromMatrix(matrix);
         }
 
         public static MikanVector3f Vector3ToMikanVector3f(Vector3 v)
@@ -90,6 +90,12 @@ namespace Mikan
         public static MikanQuatf MikanQuatfToQuaternion(Quaternion q)
         {
             return new MikanQuatf() {x = q.x, y = q.y, z= -q.z, w= q.w};
+        }
+
+        public static Vector3 MikanScaleVector3fToVector3(MikanVector3f v)
+        {
+            // Leave signs alone on scale conversion
+            return new Vector3() { x = v.x, y = v.y, z = v.z };
         }        
     }
 }
