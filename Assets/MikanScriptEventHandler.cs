@@ -6,7 +6,7 @@ public class MikanScriptEventHandler : MonoBehaviour
 {
     public MikanManager mikanManager;
     public MikanScene mikanScene;
-    public AnimationCurve cameraScaleCurve;
+    public MikanScriptContent scriptContent;
     public float cameraScaleTime = 1.0f;
 
     private Coroutine _currentRoutine;
@@ -15,8 +15,8 @@ public class MikanScriptEventHandler : MonoBehaviour
     void Start()
     {
         if (mikanManager != null)
-        {
-            float startScale = cameraScaleCurve.Evaluate(0);
+        {            
+            float startScale = scriptContent.cameraZoomInCurve.Evaluate(0);
 
             mikanManager.OnMessageEvent += OnMikanMessage;
             mikanScene.CameraPositionScale= startScale;
@@ -32,7 +32,7 @@ public class MikanScriptEventHandler : MonoBehaviour
         {
             if (mikanManager != null)
             {
-                float startScale = cameraScaleCurve.Evaluate(0);
+                float startScale = scriptContent.cameraZoomInCurve.Evaluate(0);
 
                 mikanScene.CameraPositionScale= startScale;
             }
@@ -57,8 +57,8 @@ public class MikanScriptEventHandler : MonoBehaviour
 
     private IEnumerator CameraAnimCoroutine()
     {
-        float startScale = cameraScaleCurve.Evaluate(0);
-        float endScale = cameraScaleCurve.Evaluate(1);
+        float startScale = scriptContent.cameraZoomInCurve.Evaluate(0);
+        float endScale = scriptContent.cameraZoomInCurve.Evaluate(1);
 
         if (mikanScene != null)
             mikanScene.CameraPositionScale= startScale;
@@ -66,7 +66,7 @@ public class MikanScriptEventHandler : MonoBehaviour
         for (float time = 0; time < cameraScaleTime; time += Time.unscaledDeltaTime)
         {
             float t = time / cameraScaleTime;
-            float scaleValue = cameraScaleCurve.Evaluate(t);
+            float scaleValue = scriptContent.cameraZoomInCurve.Evaluate(t);
 
             if (mikanScene != null)
                 mikanScene.CameraPositionScale= scaleValue;

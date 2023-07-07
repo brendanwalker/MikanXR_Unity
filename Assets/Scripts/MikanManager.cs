@@ -171,6 +171,12 @@ namespace Mikan
 
 			MikanClient.Mikan_FreeRenderTargetBuffers();
 			_renderTargetMemory= new MikanRenderTargetMemory();
+			_renderTargetDescriptor = null;
+		}
+
+		MikanRenderTargetDescriptor _renderTargetDescriptor= null;
+		public MikanRenderTargetDescriptor RenderTargetDescriptor{
+			get { return _renderTargetDescriptor; }
 		}
 
 		void ReallocateRenderBuffers()
@@ -182,21 +188,21 @@ namespace Mikan
 			MikanVideoSourceMode mode = new MikanVideoSourceMode();
 			if (MikanClient.Mikan_GetVideoSourceMode(mode) == MikanResult.Success)
 			{
-				MikanRenderTargetDescriptor RTDesc = new MikanRenderTargetDescriptor();
-				RTDesc.width = (uint)mode.resolution_x;
-				RTDesc.height = (uint)mode.resolution_y;
-				RTDesc.color_key = new MikanColorRGB()
+				_renderTargetDescriptor = new MikanRenderTargetDescriptor();
+				_renderTargetDescriptor.width = (uint)mode.resolution_x;
+				_renderTargetDescriptor.height = (uint)mode.resolution_y;
+				_renderTargetDescriptor.color_key = new MikanColorRGB()
 				{
 					r = 0,
 					g = 0,
 					b = 0
 				};
-				RTDesc.color_buffer_type = MikanColorBufferType.RGBA32;
-				RTDesc.depth_buffer_type = MikanDepthBufferType.NODEPTH;
-				RTDesc.graphicsAPI = _clientInfo.graphicsAPI;
+				_renderTargetDescriptor.color_buffer_type = MikanColorBufferType.RGBA32;
+				_renderTargetDescriptor.depth_buffer_type = MikanDepthBufferType.NODEPTH;
+				_renderTargetDescriptor.graphicsAPI = _clientInfo.graphicsAPI;
 
 				// Allocate any behind the scenes shared memory
-				if (MikanClient.Mikan_AllocateRenderTargetBuffers(RTDesc, _renderTargetMemory) != MikanResult.Success)
+				if (MikanClient.Mikan_AllocateRenderTargetBuffers(_renderTargetDescriptor, _renderTargetMemory) != MikanResult.Success)
 				{
 					MikanManager.Log(MikanLogLevel.Error, "MikanClient: Failed to allocate shared memory");
 				}
@@ -208,7 +214,7 @@ namespace Mikan
 
 					if (_mikanCamera != null)
 					{
-						_mikanCamera.RecreateRenderTarget(RTDesc);
+						_mikanCamera.RecreateRenderTarget(_renderTargetDescriptor);
 					}
 				}
 			}
@@ -359,6 +365,13 @@ namespace Mikan
 			if (_mikanScene == InScene)
 			{
 				_mikanScene = InScene;
+			}
+		}
+
+		public MikanScene CurrentMikanScene
+		{
+			get {
+				return _mikanScene;
 			}
 		}
 

@@ -281,12 +281,12 @@ namespace Mikan
 			}
 		}
 
-		void RebuildSceneAnchorList()
+		public void RebuildSceneAnchorList()
 		{
 			_sceneAnchors= new List<MikanAnchor>(gameObject.GetComponentsInChildren<MikanAnchor>());
 		}
 
-		void BindSceneCamera()
+		public void BindSceneCamera()
 		{
 			_sceneCamera = gameObject.GetComponentInChildren<MikanCamera>();
 		}
