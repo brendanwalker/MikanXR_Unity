@@ -13,16 +13,38 @@ namespace MikanXR
 
 		void Start()
 		{
-			_xrCamera = gameObject.GetComponent<Camera>();
+			MikanManager.Log(MikanLogLevel.Info, "MikanCamera Start called");
+
+			if (_xrCamera == null)
+			{
+				BindXRCamera();
+			}
 		}
 
 		void OnDestroy()
 		{
+			MikanManager.Log(MikanLogLevel.Info, "MikanCamera OnDestroy called");
 			DisposeRenderTarget();
+		}
+
+		public void BindXRCamera()
+		{
+			MikanManager.Log(MikanLogLevel.Info, "MikanCamera BindXRCamera called");
+
+			_xrCamera = gameObject.GetComponent<Camera>();
+			if (_xrCamera != null)
+			{
+				MikanManager.Log(MikanLogLevel.Info, "  Found XRCamera");
+			}
+			else
+			{
+				MikanManager.Log(MikanLogLevel.Warning, "  Failed to find sibling XRCamera");
+			}			
 		}
 
 		public void HandleCameraIntrinsicsChanged()
 		{
+			MikanManager.Log(MikanLogLevel.Info, "MikanCamera HandleCameraIntrinsicsChanged called");
 			if (MikanClient.Mikan_GetIsConnected())
 			{
 				MikanVideoSourceIntrinsics videoSourceIntrinsics = new MikanVideoSourceIntrinsics();
@@ -43,7 +65,19 @@ namespace MikanXR
 							MikanLogLevel.Info, 
 							$"MikanClient: Updated camera params: fov:{_xrCamera.fieldOfView}, aspect:{_xrCamera.aspect}, near:{_xrCamera.nearClipPlane}, far:{_xrCamera.farClipPlane}");
 					}
+					else
+					{
+						MikanManager.Log(MikanLogLevel.Warning, "  No valid XRCamera found to apply intrinsics to.");	
+					}
 				}
+				else
+				{
+					MikanManager.Log(MikanLogLevel.Error, "  Failed to fetch camera intrinsics!");
+				}
+			}
+			else
+			{
+				MikanManager.Log(MikanLogLevel.Info, "  Ignoring HandleCameraIntrinsicsChanged - Mikan Disconnected.");
 			}
 		}
 
@@ -53,9 +87,11 @@ namespace MikanXR
 			int width= (int)RTDesc.width;
 			int height= (int)RTDesc.height;
 
+			MikanManager.Log(MikanLogLevel.Info, "MikanCamera RecreateRenderTarget called");
+
 			if (width <= 0 || height <= 0)
 			{
-				MikanManager.Log(MikanLogLevel.Error, "MikanClient: Unable to create render texture. Texture dimension must be higher than zero.");
+				MikanManager.Log(MikanLogLevel.Error, "  MikanCamera: Unable to create render texture. Texture dimension must be higher than zero.");
 				return false;
 			}
 
@@ -72,7 +108,7 @@ namespace MikanXR
 
 			if (!_renderTexture.Create())
 			{
-				MikanManager.Log(MikanLogLevel.Error, "MikanClient: Unable to create render texture.");
+				MikanManager.Log(MikanLogLevel.Error, "  MikanCamera: Unable to create render texture.");
 				return false;
 			}
 
@@ -80,8 +116,12 @@ namespace MikanXR
 			{
 				_xrCamera.targetTexture = _renderTexture;
 			}
+			else
+			{
+				MikanManager.Log(MikanLogLevel.Warning, "  No valid XRCamera found to assign render target to.");	
+			}
 
-			MikanManager.Log(MikanLogLevel.Info, $"MikanClient: Created {width}x{height} render target texture");
+			MikanManager.Log(MikanLogLevel.Info, $"  MikanCamera: Created {width}x{height} render target texture");
 
 			return bSuccess;
 		}

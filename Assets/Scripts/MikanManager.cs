@@ -49,22 +49,31 @@ namespace Mikan
 
 		void OnEnable()
 		{
+			MikanManager.Log(MikanLogLevel.Info, $"MikanManager: OnEnable Called");		
 			InitializeMikan();
 		}
 
 		void OnDisable()
 		{
+			MikanManager.Log(MikanLogLevel.Info, $"MikanManager: OnDisable Called");
 			ShutdownMikan();
 		}
 
 		void OnApplicationQuit()
 		{
+			MikanManager.Log(MikanLogLevel.Info, $"MikanManager: OnApplicationQuit Called");
 			ShutdownMikan();
 		}
 
 		void InitializeMikan()
 		{
-			_apiInitialized = false;
+			MikanManager.Log(MikanLogLevel.Info, $"MikanManager: InitializeMikan Called");		
+
+			if (_apiInitialized)
+			{
+				MikanManager.Log(MikanLogLevel.Warning, $"  MikanManager: Ignoring InitializeMikan. Already initialized.");		
+				return;
+			}
 
 			MikanClientGraphicsApi graphicsAPI = MikanClientGraphicsApi.UNKNOWN;
 			switch (SystemInfo.graphicsDeviceType)
@@ -96,17 +105,31 @@ namespace Mikan
 			MikanResult result = MikanClient.Mikan_Initialize(MikanLogLevel.Info, MikanManager.CAPILogCallback);
 			if (result == MikanResult.Success)
 			{
+				MikanManager.Log(MikanLogLevel.Info, $"  MikanManager: Successfully initialized Mikan");		
 				_apiInitialized = true;
+			}
+			else
+			{
+				MikanManager.Log(MikanLogLevel.Error, $"  MikanManager: Failed to initialize Mikan: Error {result}");		
 			}
 		}
 
 		void ShutdownMikan()
 		{
+			MikanManager.Log(MikanLogLevel.Info, $"MikanManager: ShutdownMikan Called");
+
 			if (_apiInitialized)
 			{
 				FreeRenderBuffers();
+
 				MikanClient.Mikan_Shutdown();
+				MikanManager.Log(MikanLogLevel.Info, $"  MikanManager: Shutdown Mikan API");
+
 				_apiInitialized = false;
+			}
+			else
+			{
+				MikanManager.Log(MikanLogLevel.Warning, $"  MikanManager: Ignoring ShutdownMikan - Already shutdown.");
 			}
 		}
 
@@ -130,6 +153,11 @@ namespace Mikan
 					{
 						// Reset reconnect attempt timer
 						_mikanReconnectTimeout = 1.0f;
+						MikanManager.Log(MikanLogLevel.Warning, $"  MikanManager: Failed to connect to Mikan. Retry in {_mikanReconnectTimeout} seconds.");
+					}
+					else
+					{
+						MikanManager.Log(MikanLogLevel.Info, $"  MikanManager: Successfully connected to Mikan");
 					}
 				}
 				else
@@ -160,6 +188,8 @@ namespace Mikan
 
 		void FreeRenderBuffers()
 		{
+			MikanManager.Log(MikanLogLevel.Info, $"MikanManager: FreeRenderBuffers Called");
+
 			if (_mikanScene != null)
 			{
 				MikanCamera mikanCamera = _mikanScene.SceneCamera;
@@ -167,6 +197,14 @@ namespace Mikan
 				{
 					mikanCamera.DisposeRenderTarget();
 				}
+				else
+				{
+					MikanManager.Log(MikanLogLevel.Warning, $"  MikanManager: No camera bound");
+				}
+			}
+			else
+			{
+				MikanManager.Log(MikanLogLevel.Warning, $"  MikanManager: FreeRenderBuffers - No scene bound");
 			}
 
 			MikanClient.Mikan_FreeRenderTargetBuffers();
@@ -181,6 +219,8 @@ namespace Mikan
 
 		void ReallocateRenderBuffers()
 		{
+			MikanManager.Log(MikanLogLevel.Info, $"MikanManager: ReallocateRenderBuffers Called");
+
 			// Clean up any previously allocated render targets
 			FreeRenderBuffers();
 
@@ -202,9 +242,13 @@ namespace Mikan
 				_renderTargetDescriptor.graphicsAPI = _clientInfo.graphicsAPI;
 
 				// Allocate any behind the scenes shared memory
-				if (MikanClient.Mikan_AllocateRenderTargetBuffers(_renderTargetDescriptor, _renderTargetMemory) != MikanResult.Success)
+				if (MikanClient.Mikan_AllocateRenderTargetBuffers(_renderTargetDescriptor, _renderTargetMemory) == MikanResult.Success)
 				{
-					MikanManager.Log(MikanLogLevel.Error, "MikanClient: Failed to allocate shared memory");
+					MikanManager.Log(MikanLogLevel.Info, "  MikanManager: Allocated render target buffers");
+				}
+				else
+				{
+					MikanManager.Log(MikanLogLevel.Error, "  MikanManager: Failed to allocate shared memory");
 				}
 
 				// Tell the active scene camera to recreate a matching render target
@@ -216,11 +260,19 @@ namespace Mikan
 					{
 						_mikanCamera.RecreateRenderTarget(_renderTargetDescriptor);
 					}
+					else
+					{
+						MikanManager.Log(MikanLogLevel.Warning, $"  MikanManager: ReallocateRenderBuffers - No camera bound");
+					}					
 				}
+				else
+				{
+					MikanManager.Log(MikanLogLevel.Warning, $"  MikanManager: ReallocateRenderBuffers - No scene bound");
+				}				
 			}
 			else
 			{
-				MikanManager.Log(MikanLogLevel.Error, "MikanClient: Failed to get video source mode");
+				MikanManager.Log(MikanLogLevel.Error, "MikanManager: Failed to get video source mode");
 			}
 		}
 
@@ -278,44 +330,68 @@ namespace Mikan
 
 		void HandleMikanConnected()
 		{
-			MikanManager.Log(MikanLogLevel.Warning, "Mikan: Connected!");
+			MikanManager.Log(MikanLogLevel.Info, "MikanManager: Connected!");
 			ReallocateRenderBuffers();
 
 			if (_mikanScene != null)
 			{
 				_mikanScene.HandleMikanConnected();
 			}
+			else
+			{
+				MikanManager.Log(MikanLogLevel.Warning, $"  MikanManager: No camera bound");
+			}			
 
-			OnConnectEvent.Invoke();
+			if (OnConnectEvent != null)
+			{
+				OnConnectEvent.Invoke();
+			}
 		}
 
 		void HandleMikanDisconnected()
 		{
-			MikanManager.Log(MikanLogLevel.Warning, "Mikan: Disconnected!");
+			MikanManager.Log(MikanLogLevel.Warning, "MikanManager: Disconnected!");
 			FreeRenderBuffers();
 
 			if (_mikanScene != null)
 			{
 				_mikanScene.HandleMikanDisconnected();
 			}
+			else
+			{
+				MikanManager.Log(MikanLogLevel.Warning, $"  MikanManager: HandleMikanDisconnected - No scene bound");
+			}
 
-			OnDisconnectEvent.Invoke();
+			if (OnDisconnectEvent != null)
+			{
+				OnDisconnectEvent.Invoke();
+			}
 		}
 
 		void HandleAnchorListChanged()
 		{
+			MikanManager.Log(MikanLogLevel.Info, $"MikanManager: HandleAnchorListChanged called.");
 			if (_mikanScene != null)
 			{
 				_mikanScene.HandleAnchorListChanged();
 			}
+			else
+			{
+				MikanManager.Log(MikanLogLevel.Warning, $"  MikanManager: HandleAnchorListChanged - No scene bound");
+			}			
 		}
 
 		void HandleAnchorPoseChanged(MikanAnchorPoseUpdateEvent AnchorPoseEvent)
 		{
+			MikanManager.Log(MikanLogLevel.Info, $"MikanManager: HandleAnchorPoseChanged called for Anchor ID {AnchorPoseEvent.anchor_id}.");
 			if (_mikanScene != null)
 			{
 				_mikanScene.HandleAnchorPoseChanged(AnchorPoseEvent);
 			}
+			else
+			{
+				MikanManager.Log(MikanLogLevel.Warning, $"  MikanManager: HandleAnchorPoseChanged - No scene bound");
+			}			
 		}
 
 		void HandleNewVideoSourceFrame(MikanVideoSourceNewFrameEvent newFrameEvent)
@@ -324,31 +400,50 @@ namespace Mikan
 			{
 				_mikanScene.HandleNewVideoSourceFrame(newFrameEvent);
 			}
+			else
+			{
+				MikanManager.Log(MikanLogLevel.Warning, $"  MikanManager: HandleNewVideoSourceFrame - No scene bound");
+			}			
 		}
 
 		void HandleCameraIntrinsicsChanged()
 		{
+			MikanManager.Log(MikanLogLevel.Info, $"MikanManager: HandleCameraIntrinsicsChanged called.");
 			if (_mikanScene != null)
 			{
 				_mikanScene.HandleCameraIntrinsicsChanged();
 			}
+			else
+			{
+				MikanManager.Log(MikanLogLevel.Warning, $"  MikanManager: HandleCameraIntrinsicsChanged - No scene bound");
+			}			
 		}
 
 		void HandleCameraAttachmentChanged()
 		{
+			MikanManager.Log(MikanLogLevel.Info, $"MikanManager: HandleCameraAttachmentChanged called.");
+
 			if (_mikanScene != null)
 			{
 				_mikanScene.HandleCameraAttachmentChanged();
 			}
+			else
+			{
+				MikanManager.Log(MikanLogLevel.Warning, $"  MikanManager: HandleCameraAttachmentChanged - No scene bound");
+			}			
 		}
 
 		void HandleScriptMessage(MikanScriptMessageInfo MessageEvent)
 		{
+			MikanManager.Log(MikanLogLevel.Info, $"MikanManager: HandleScriptMessage called (message={MessageEvent.content}).");
+
 			OnMessageEvent?.Invoke(MessageEvent.content);
 		}
 
 		public void SendMikanMessage(string MessageString)
 		{
+			MikanManager.Log(MikanLogLevel.Info, $"MikanManager: SendMikanMessage called (message={MessageString}).");
+
 			MikanScriptMessageInfo MessageEvent = new MikanScriptMessageInfo();
 			MessageEvent.content = MessageString;
 
@@ -358,13 +453,19 @@ namespace Mikan
 		public void BindMikanScene(MikanScene InScene)
 		{
 			_mikanScene= InScene;
+			MikanManager.Log(MikanLogLevel.Info, $"MikanManager: Binding Mikan Scene");
 		}
 
 		public void UnbindMikanScene(MikanScene InScene)
 		{
 			if (_mikanScene == InScene)
 			{
+				MikanManager.Log(MikanLogLevel.Info, $"MikanManager: Unbinding Mikan Scene");
 				_mikanScene = InScene;
+			}
+			else
+			{
+				MikanManager.Log(MikanLogLevel.Warning, $"MikanManager: Trying to unbind incorrect scene.");
 			}
 		}
 
