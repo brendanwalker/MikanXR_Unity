@@ -1,27 +1,30 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace Mikan
+namespace MikanXRPlugin
 {
     /// The ID of a VR Device
     using MikanSpatialAnchorID = System.Int32;
 
-    public class MikanAnchor : MonoBehaviour
+    public class MikanAnchor : MikanBehavior
     {
-        private MikanSpatialAnchorID _anchorId = MikanClient.INVALID_MIKAN_ID;
-        public MikanSpatialAnchorID AnchorID { 
-            get { return _anchorId; } 
-        }
-        
+        private MikanSpatialAnchorID _anchorId = -1;
+        public MikanSpatialAnchorID AnchorID => _anchorId;
+
         [SerializeField]
-        private string _anchorName= "";
-        public string AnchorName { 
-            get { return _anchorName; } 
-            set { _anchorName = value; }
+        private string _anchorName = "";
+        public string AnchorName
+        {
+            get
+            {
+                return _anchorName;
+            }
+            set
+            {
+                _anchorName = value;
+            }
         }
 
-        public MikanScene GetParentScene() 
+        public MikanScene GetParentScene()
         {
             return gameObject.GetComponentInParent<MikanScene>();
         }
@@ -36,7 +39,7 @@ namespace Mikan
 
                 if (mikanAnchorInfo != null)
                 {
-                    _anchorId= mikanAnchorInfo.AnchorId;
+                    _anchorId = mikanAnchorInfo.AnchorId;
 
                     // Update our scene transform now that we have an assigned anchor
                     UpdateSceneTransform();
@@ -46,9 +49,9 @@ namespace Mikan
 
         public void UpdateSceneTransform()
         {
-            if (AnchorID != MikanClient.INVALID_MIKAN_ID)
+            if (AnchorID != -1)
             {
-                MikanScene ownerScene= GetParentScene();
+                MikanScene ownerScene = GetParentScene();
 
                 if (ownerScene != null)
                 {
@@ -66,10 +69,10 @@ namespace Mikan
                         Matrix4x4 SceneSpaceTransform = MikanToSceneXform * MikanSpaceTransform;
 
                         // Update the relative transform of the anchor
-						transform.localPosition = MikanMath.ExtractTranslationFromMatrix(SceneSpaceTransform);
-						transform.localRotation = MikanMath.ExtractRotationFromMatrix(SceneSpaceTransform);
-						transform.localScale = MikanMath.ExtractScaleFromMatrix(SceneSpaceTransform);
-					}
+                        transform.localPosition = MikanMath.ExtractTranslationFromMatrix(SceneSpaceTransform);
+                        transform.localRotation = MikanMath.ExtractRotationFromMatrix(SceneSpaceTransform);
+                        transform.localScale = MikanMath.ExtractScaleFromMatrix(SceneSpaceTransform);
+                    }
                 }
             }
         }
