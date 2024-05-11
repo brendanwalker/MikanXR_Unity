@@ -89,6 +89,8 @@ namespace MikanXRPlugin
                         _xrCamera.nearClipPlane = (float)monoIntrinsics.znear;
                         _xrCamera.farClipPlane = (float)monoIntrinsics.zfar;
                         _xrCamera.depthTextureMode = DepthTextureMode.Depth;
+                        _xrCamera.clearFlags = CameraClearFlags.SolidColor;
+                        _xrCamera.backgroundColor = Color.clear;
 
                         Log(
                             MikanLogLevel.Info,
