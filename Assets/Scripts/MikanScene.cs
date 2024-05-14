@@ -3,11 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using MikanXR;
 
-#if UNITY_2017_2_OR_NEWER
-using UnityEngine.XR;
-#endif
-
-
 namespace MikanXRPlugin
 {
     using MikanSpatialAnchorID = Int32;
@@ -38,9 +33,6 @@ namespace MikanXRPlugin
     public class MikanScene : MikanBehavior
     {
         [SerializeField]
-        private MikanManager _mikanManager = null;
-
-        [SerializeField]
         private string _sceneOriginAnchorName = "";
         public string SceneOriginAnchorName
         {
@@ -69,28 +61,12 @@ namespace MikanXRPlugin
             }
         }
 
-        [SerializeField]
-        private MikanCamera _sceneCamera = null;
-        public MikanCamera SceneCamera
-        {
-            get
-            {
-                return _sceneCamera;
-            }
-            set
-            {
-                _sceneCamera = value;
-            }
-        }
+		private GameObject _sceneCameraObject = null;
+		private MikanCamera _sceneCamera = null;
+        public MikanCamera SceneCamera => _sceneCamera;
 
         private Matrix4x4 _mikanToSceneTransform = Matrix4x4.identity;
-        public Matrix4x4 MikanToSceneTransform
-        {
-            get
-            {
-                return _mikanToSceneTransform;
-            }
-        }
+        public Matrix4x4 MikanToSceneTransform => _mikanToSceneTransform;
 
         // The table of anchors fetched from Mikan
         private Dictionary<MikanSpatialAnchorID, MikanAnchorInfo> _mikanAnchorInfoMap = new Dictionary<MikanSpatialAnchorID, MikanAnchorInfo>();
@@ -105,25 +81,110 @@ namespace MikanXRPlugin
         {
             _mikanToSceneTransform = Matrix4x4.identity;
 
-            // Find the first attached mikan scene
-            BindSceneCamera();
+            // Bind client events
+            Client.OnConnected.AddListener(HandleMikanConnected);
+            Client.OnDisconnected.AddListener(HandleMikanDisconnected);
+			Client.OnRenderBufferCreated.AddListener(HandleRenderBufferCreated);
+            Client.OnRenderBufferDisposed.AddListener(HandleRenderBufferDisposed);
+			Client.OnAnchorListChanged.AddListener(HandleAnchorListChanged);
+            Client.OnAnchorPoseChanged.AddListener(HandleAnchorPoseChanged);
+            Client.OnCameraAttachmentChanged.AddListener(HandleCameraAttachmentChanged);
+            Client.OnNewFrameReceived.AddListener(HandleNewVideoSourceFrame);
 
             // Gather all of the scene anchor components attached to the scene
             RebuildSceneAnchorList();
 
-            // Register ourselves with the MikanManager
-            _mikanManager.BindMikanScene(this);
+            // Spawn the Mikan camera
+            SpawnMikanCamera();
+
+			// If we are already connected to Mikan,
+			// tell the scene to fetch anchors, setup scene transform, etc
+			// Otherwise wait for MikanManager to tell the scene about the connection
+			if (ClientAPI.GetIsConnected())
+			{
+				HandleMikanConnected();
+			}
+		}
+
+		void OnDisable()
+        {
+            // Unbind client events
+            Client.OnConnected.RemoveListener(HandleMikanConnected);
+            Client.OnDisconnected.RemoveListener(HandleMikanDisconnected);
+			Client.OnRenderBufferCreated.RemoveListener(HandleRenderBufferCreated);
+            Client.OnRenderBufferDisposed.RemoveListener(HandleRenderBufferDisposed);
+			Client.OnAnchorListChanged.RemoveListener(HandleAnchorListChanged);
+            Client.OnAnchorPoseChanged.RemoveListener(HandleAnchorPoseChanged);
+            Client.OnCameraAttachmentChanged.RemoveListener(HandleCameraAttachmentChanged);
+            Client.OnNewFrameReceived.RemoveListener(HandleNewVideoSourceFrame);
+
+            // Despawn the Mikan camera
+            DespawnMikanCamera();
         }
 
-        void OnDisable()
-        {
-            _mikanManager.UnbindMikanScene(this);
-        }
+		void SpawnMikanCamera()
+		{
+			if (_sceneCameraObject == null)
+			{
+				Log(MikanLogLevel.Info, "MikanManager: Spawning Mikan camera");
 
-        public MikanAnchorInfo GetMikanAnchorInfoById(MikanSpatialAnchorID anchorId)
+				_sceneCameraObject = new GameObject(
+					"MikanCameraObject",
+					new System.Type[] {
+						typeof(Camera),
+						typeof(MikanCamera)});
+
+				Camera cameraComponent = _sceneCameraObject.GetComponent<Camera>();
+				cameraComponent.stereoTargetEye = StereoTargetEyeMask.None;
+				cameraComponent.backgroundColor = new Color(0, 0, 0, 0);
+				cameraComponent.clearFlags = CameraClearFlags.SolidColor;
+				cameraComponent.forceIntoRenderTexture = true;
+				cameraComponent.transform.parent = this.transform;
+
+				_sceneCamera = _sceneCameraObject.GetComponent<MikanCamera>();
+
+				// Tell the MikanCamera to look for a sibling Camera component
+				_sceneCamera.BindXRCamera();
+
+				// If we are connected to Mikan, 
+				// copy the camera intrinsics (fov, pixel dimensions, etc) to the Unity Camera
+				// If not, wait for Mikan to connect and we'll copy the settings then
+				_sceneCamera.HandleCameraIntrinsicsChanged();
+
+				// If we have a valid render target descriptor (defined video source),
+				// create a valid render target from the descriptor
+				// If not, wait for Mikan to connect and we'll create it then
+				if (Client.IsRenderTargetDescriptorValid)
+				{
+					_sceneCamera.RecreateRenderTarget(Client.RenderTargetDescriptor);
+				}
+			}
+			else
+			{
+				Log(MikanLogLevel.Info, "MikanManager: Ignoring camera spawn request. Already spawned.");
+			}
+		}
+
+		void DespawnMikanCamera()
+		{
+			if (_sceneCamera != null)
+			{
+				Log(MikanLogLevel.Info, "MikanManager: Despawn Mikan camera");
+				_sceneCamera.DisposeRenderTarget();
+                _sceneCamera= null;
+
+				Destroy(_sceneCameraObject);
+				_sceneCameraObject = null;
+			}
+			else
+			{
+				Log(MikanLogLevel.Info, "MikanManager: Ignoring camera de-spawn request. Already despawned.");
+			}
+		}
+
+		public MikanAnchorInfo GetMikanAnchorInfoById(MikanSpatialAnchorID anchorId)
         {
-            MikanAnchorInfo anchorInfo = null;
-            if (_mikanAnchorInfoMap.TryGetValue(anchorId, out anchorInfo))
+            if (_mikanAnchorInfoMap.TryGetValue(anchorId, out MikanAnchorInfo anchorInfo))
             {
                 return anchorInfo;
             }
@@ -144,31 +205,56 @@ namespace MikanXRPlugin
             return null;
         }
 
-        public void HandleMikanConnected()
+        protected void HandleMikanConnected()
         {
             HandleCameraIntrinsicsChanged();
             HandleAnchorListChanged();
         }
 
-        public void HandleMikanDisconnected()
+        protected void HandleMikanDisconnected()
         {
-
+            HandleRenderBufferDisposed();
         }
+
+        protected void HandleRenderBufferCreated()
+        {
+			if (Client.IsRenderTargetDescriptorValid)
+			{
+                if (_sceneCamera != null)
+                {
+					_sceneCamera.RecreateRenderTarget(Client.RenderTargetDescriptor);
+				}
+                else
+                {
+                    Log(MikanLogLevel.Warning, "MikanScene: Missing expected scene camera.");
+                }
+			}
+			else
+			{
+				Log(MikanLogLevel.Error, "MikanScene: Invalid render target descriptor!");
+			}
+		}
+
+        protected void HandleRenderBufferDisposed()
+        {
+			if (_sceneCamera != null)
+            {
+				_sceneCamera.DisposeRenderTarget();
+			}
+		}
 
         public async void HandleAnchorListChanged()
         {
-            var clientAPI = _mikanManager.ClientAPI;
-
             _mikanAnchorInfoMap.Clear();
 
-            MikanResponse listResponse = await clientAPI.SpatialAnchorAPI.GetSpatialAnchorList();
+            MikanResponse listResponse = await ClientAPI.SpatialAnchorAPI.GetSpatialAnchorList();
             if (listResponse.resultCode == MikanResult.Success)
             {
                 MikanSpatialAnchorList spatialAnchorList = listResponse as MikanSpatialAnchorList;
 
                 foreach (var anchorID in spatialAnchorList.spatial_anchor_id_list)
                 {
-                    MikanResponse anchorResponse = await clientAPI.SpatialAnchorAPI.getSpatialAnchorInfo(anchorID);
+                    MikanResponse anchorResponse = await ClientAPI.SpatialAnchorAPI.getSpatialAnchorInfo(anchorID);
                     if (anchorResponse.resultCode == MikanResult.Success)
                     {
                         MikanSpatialAnchorInfo mikanAnchorInfo = anchorResponse as MikanSpatialAnchorInfo;
@@ -237,9 +323,7 @@ namespace MikanXRPlugin
 
         public async void HandleCameraAttachmentChanged()
         {
-            var clientAPI = _mikanManager.ClientAPI;
-
-            MikanResponse response = await clientAPI.VideoSourceAPI.GetVideoSourceAttachment();
+            MikanResponse response = await ClientAPI.VideoSourceAPI.GetVideoSourceAttachment();
             if (response.resultCode == MikanResult.Success)
             {
                 //var attachInfo = response as MikanVideoSourceAttachmentInfo;
@@ -305,11 +389,6 @@ namespace MikanXRPlugin
         public void RebuildSceneAnchorList()
         {
             _sceneAnchors = new List<MikanAnchor>(gameObject.GetComponentsInChildren<MikanAnchor>());
-        }
-
-        public void BindSceneCamera()
-        {
-            _sceneCamera = gameObject.GetComponentInChildren<MikanCamera>();
         }
     }
 }

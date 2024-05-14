@@ -1,5 +1,7 @@
 ﻿using System.Collections;
-using Mikan;
+using System.IO;
+using MikanXR;
+using MikanXRPlugin;
 using UnityEngine;
 
 public class MikanScriptEventHandler : MonoBehaviour
@@ -14,17 +16,41 @@ public class MikanScriptEventHandler : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        string appDataPath= Application.dataPath;
+        var mikanContentAssetBundle = 
+            AssetBundle.LoadFromFile(
+                Path.Combine(appDataPath, "__Bundles", "mikancontent"));
+        if (mikanContentAssetBundle != null)
+        {
+            scriptContent = mikanContentAssetBundle.LoadAsset<MikanScriptContent>("BeatSaberMikanContent");
+        }
+        else
+        {
+            MikanManager.Instance.Log(MikanLogLevel.Error, "Failed to load AssetBundle!");
+        }
+
         if (mikanManager != null)
         {            
-            float startScale = scriptContent.cameraZoomInCurve.Evaluate(0);
+            mikanManager.MikanClient.OnScriptMessage.AddListener(this.OnMikanMessage);
+        }
 
-            mikanManager.OnMessageEvent += OnMikanMessage;
+        if (scriptContent != null && mikanScene != null)
+        {
+            float startScale = scriptContent.cameraZoomInCurve.Evaluate(0);
             mikanScene.CameraPositionScale= startScale;
         }
     }
 
-    // Update is called once per frame
-    void Update() { }
+	private void OnDestroy()
+	{
+		if (mikanManager != null)
+        {
+			mikanManager.MikanClient.OnScriptMessage.RemoveListener(this.OnMikanMessage);
+		}
+	}
+
+	// Update is called once per frame
+	void Update() { }
 
     public void OnMikanMessage(string message)
     {

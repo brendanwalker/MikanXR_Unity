@@ -69,12 +69,10 @@ namespace MikanXRPlugin
 
         public async void HandleCameraIntrinsicsChanged()
         {
-            var client = MikanManager.Instance.ClientAPI;
-
             Log(MikanLogLevel.Info, "MikanCamera HandleCameraIntrinsicsChanged called");
-            if (client.GetIsConnected())
+            if (ClientAPI.GetIsConnected())
             {
-                var response = await client.VideoSourceAPI.GetVideoSourceIntrinsics();
+                var response = await ClientAPI.VideoSourceAPI.GetVideoSourceIntrinsics();
                 if (response.resultCode == MikanResult.Success)
                 {
                     var videoSourceIntrinsics = response as MikanVideoSourceIntrinsics;
@@ -111,6 +109,7 @@ namespace MikanXRPlugin
                 Log(MikanLogLevel.Info, "  Ignoring HandleCameraIntrinsicsChanged - Mikan Disconnected.");
             }
         }
+
 		public bool RecreateRenderTarget(MikanRenderTargetDescriptor RTDesc)
         {
             bool bSuccess = true;
@@ -216,7 +215,7 @@ namespace MikanXRPlugin
                     zNear = _xrCamera.nearClipPlane,
                     zFar = _xrCamera.farClipPlane
                 };
-                MikanManager.Instance.ClientAPI.PublishRenderTargetTextures(
+                ClientAPI.PublishRenderTargetTextures(
                     textureNativePtr, depthTextureNativePtr, ref frame);
             }
         }
