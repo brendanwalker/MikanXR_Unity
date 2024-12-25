@@ -1,0 +1,35 @@
+ManifestFileVersion: 0
+CRC: 1887205609
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: c985758bcef4bee055e98007910e7b00
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: d8c28aac84979c1bf73301775f8a46af
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 74
+  Script: {instanceID: 0}
+- Class: 90
+  Script: {instanceID: 0}
+- Class: 95
+  Script: {instanceID: 0}
+- Class: 137
+  Script: {instanceID: 0}
+Assets:
+- Assets/SmolCalli/source/smolcalli_seafoamboy_anim.fbx
+Dependencies:
+- D:/Github/git-BrendanWalker/MikanXR_Unity/MikanXR_Unity/Assets/__Bundles/saber
