@@ -286,7 +286,7 @@ namespace MikanXR
 				descriptor = RTDesc
 			};
 			var response = _client.ClientAPI.SendRequest(createRequest).FetchResponse();
-			if (response.resultCode == MikanAPIResult.Success)
+			if (response.resultCode != MikanAPIResult.Success)
 			{
 				_logger.Log(MikanLogLevel.Error, "  MikanCamera: Unable to create render texture.");
 				return false;
