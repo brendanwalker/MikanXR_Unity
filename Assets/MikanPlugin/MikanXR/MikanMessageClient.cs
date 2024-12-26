@@ -83,6 +83,29 @@ namespace MikanXR
 			string url = $"{host}:{port}";
 			string protocol = $"{WEBSOCKET_PROTOCOL_PREFIX}{_protocolVersion}";
 			_wsConnection = new WebSocket(url, protocol);
+			_wsConnection.Log.Level = LogLevel.Info;
+			_wsConnection.Log.Output = (data, output) =>
+			{
+				switch (data.Level)
+				{
+					case LogLevel.Fatal:
+					case LogLevel.Error:
+						_logger.Log(MikanLogLevel.Error, data.Message);
+						break;
+					case LogLevel.Warn:
+						_logger.Log(MikanLogLevel.Warning, data.Message);
+						break;
+					case LogLevel.Info:
+						_logger.Log(MikanLogLevel.Info, data.Message);
+						break;
+					case LogLevel.Debug:
+						_logger.Log(MikanLogLevel.Debug, data.Message);
+						break;
+					case LogLevel.Trace:
+						_logger.Log(MikanLogLevel.Trace, data.Message);
+						break;
+				}
+			};
 
 			_wsConnection.OnOpen += EnqueueWebsocketConnectEvent;
 			_wsConnection.OnMessage += EnqueueWebsocketMessageEvent;
