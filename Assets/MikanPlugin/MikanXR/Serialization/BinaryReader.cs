@@ -103,14 +103,14 @@ namespace MikanXR
 		public string ReadUTF8String()
 		{
 			Int32 byteCount = ReadInt32();
-			byte[] bytes = ReadBytes(byteCount);
+			string utf8String= "";
+			if (byteCount > 0)
+			{
+				utf8String= System.Text.Encoding.UTF8.GetString(_readBuffer, _readBufferIndex, byteCount);
+				_readBufferIndex += byteCount;
+			}
 
-			return System.Text.Encoding.UTF8.GetString(bytes);
-		}
-
-		public byte[] ReadBytes(int count)
-		{
-			return null;
+			return utf8String;
 		}
 	}
 }
