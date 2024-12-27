@@ -97,7 +97,7 @@ namespace MikanXR
 
 		public RenderTexture GetColorRenderTexture()
 		{
-			return _packDepthRenderTexture;
+			return _colorRenderTexture;
 		}
 
 		public RenderTexture GetPackDepthRenderTexture()
