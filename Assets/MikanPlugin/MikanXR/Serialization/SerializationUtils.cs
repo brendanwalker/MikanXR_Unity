@@ -144,6 +144,25 @@ namespace MikanXR
 			return (long)classIdField.GetValue(null);
 		}
 
+		public static void memoryOffsetSortStructFields(Type classType, ref List<FieldInfo> outFields)
+		{
+			// Add fields from the parent classes first
+			if (classType.BaseType != null)
+			{
+				memoryOffsetSortStructFields(classType.BaseType, ref outFields);
+			}
+
+			// Add fields from the current class
+			// TODO: Observationally, Type.GetFields() returns fields in declaration order, but it's not guaranteed
+			// We should really be using a custom attribute to specify the order and then sort on that.
+			// See "Remarks" in https://learn.microsoft.com/en-us/dotnet/api/system.type.getfields?view=net-9.0&redirectedfrom=MSDN#System_Type_GetFields
+			FieldInfo[] fields = classType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+			foreach (FieldInfo field in fields)
+			{
+				outFields.Add(field);
+			}
+		}
+
 		public static void visitObject<T>(T instance, IVisitor visitor) where T : struct
 		{
 			visitObject(instance, typeof(T), visitor);
@@ -151,7 +170,9 @@ namespace MikanXR
 
 		public static void visitObject(object instance, Type classType, IVisitor visitor)
 		{
-			FieldInfo[] fields= classType.GetFields(BindingFlags.Instance | BindingFlags.Public);
+			List<FieldInfo> fields = new List<FieldInfo>();
+			memoryOffsetSortStructFields(classType, ref fields);
+
 			foreach (FieldInfo field in fields)
 			{
 				visitField(instance, field, visitor);
