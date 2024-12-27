@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Events;
-using UnityEditor.PackageManager;
 
 namespace MikanXR
 {
