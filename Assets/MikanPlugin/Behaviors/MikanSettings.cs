@@ -57,12 +57,14 @@ namespace MikanXR
 			}
 		}
 
-		public virtual void LoadSettings() 
+		public virtual bool LoadSettings() 
 		{ 
+			return false;
 		}
 
-		public virtual void SaveSettings() 
+		public virtual bool SaveSettings() 
 		{ 
+			return false;
 		}
 
 		protected virtual void DeserializeSettings(Dictionary<string, string> settings)

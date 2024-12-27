@@ -162,6 +162,7 @@ MonoBehaviour:
     type: 2}
   anchorPrefab: {fileID: 0}
   stencilPrefab: {fileID: 0}
+  DefaultSceneScale: 10
 --- !u!4 &509746360
 Transform:
   m_ObjectHideFlags: 0

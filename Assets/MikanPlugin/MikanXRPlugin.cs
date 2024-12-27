@@ -12,6 +12,8 @@ namespace MikanXR
 
 		private bool _isMikanInitialized = false;
 
+		public float DefaultSceneScale = 1.0f;
+
 		private MikanSettings _settings = null;
 		public MikanSettings Settings => _settings;
 
@@ -41,7 +43,10 @@ namespace MikanXR
 		protected virtual void InitSettings()
 		{
 			_settings = new MikanSettings();
-			_settings.LoadSettings();
+			if (!_settings.LoadSettings())
+			{
+				_settings.SceneScale = DefaultSceneScale;
+			}
 		}
 
 		public void OnDestroy()
