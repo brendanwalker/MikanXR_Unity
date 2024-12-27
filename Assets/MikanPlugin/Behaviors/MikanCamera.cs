@@ -342,7 +342,7 @@ namespace MikanXR
 					zNear = _xrCamera.nearClipPlane,
 					zFar = _xrCamera.farClipPlane
 				};
-				_client.ClientAPI.SendRequest(writeColorRequest).AwaitResponse();
+				_client.ClientAPI.SendRequest(writeDepthRequest).AwaitResponse();
 
 				if (_mikanClientGraphicsApi == MikanClientGraphicsApi.Direct3D11 ||
 					_mikanClientGraphicsApi == MikanClientGraphicsApi.OpenGL)
