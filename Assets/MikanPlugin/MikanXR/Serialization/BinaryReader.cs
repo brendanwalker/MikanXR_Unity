@@ -95,7 +95,7 @@ namespace MikanXR
 		public double ReadDouble()
 		{
 			double value= BitConverter.ToDouble(_readBuffer, _readBufferIndex);
-			_readBufferIndex += sizeof(float);
+			_readBufferIndex += sizeof(double);
 
 			return value;
 		}
